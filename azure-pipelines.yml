@@ -12,9 +12,6 @@ jobs:
     matrix:
       production:
         cvc4Config: 'production'
-        #      production_clang:
-        #        cvc4Config: ''
-        #        cvc4ConfigEnv: 'CC=clang CXX=clang++'
       debug:
         cvc4Config: 'debug'
   steps:
@@ -30,7 +27,7 @@ jobs:
     displayName: ccache
 
   - script: |
-      sudo apt-get install \
+      sudo apt-get install -y \
         antlr3 \
         cmake \
         cxxtest \
