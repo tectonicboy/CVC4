@@ -1,0 +1,110 @@
+trigger:
+- azure-pipelines
+
+variables:
+  CCACHE_DIR: $(Pipeline.Workspace)/ccache
+
+jobs:
+- job: Linux
+  pool:
+   vmImage: 'ubuntu-16.04'
+  strategy:
+    matrix:
+      production:
+        cvc4Config: 'production'
+        #      production_clang:
+        #        cvc4Config: ''
+        #        cvc4ConfigEnv: 'CC=clang CXX=clang++'
+      debug:
+        cvc4Config: 'debug'
+  steps:
+  - bash: |
+      sudo apt-get install ccache -y
+      echo "##vso[task.prependpath]/usr/lib/ccache"
+    displayName: 'Install ccache'
+
+  - task: CacheBeta@0
+    inputs:
+        key: $(Agent.OS)
+        path: $(CCACHE_DIR)
+    displayName: ccache
+
+  - script: |
+      sudo apt-get install \
+        antlr3 \
+        cmake \
+        cxxtest \
+        junit4 \
+        libantlr3c-dev \
+        libcln-dev \
+        libgmp-dev \
+        libhamcrest-java \
+        openjdk-8-jdk \
+        swig3.0
+    displayName: 'apt-get'
+
+  - script: sudo pip install -U cython
+    condition: eq(variables.needCython, true)
+    displayName: 'Install Cython'
+
+  - script: echo ""
+    displayName: 'Setup dependencies'
+
+  - script: $(cvc4ConfigEnv) ./configure.sh $(cvc4Config)
+    displayName: 'Configure CVC4'
+
+  - script: make -j $(nproc)
+    workingDirectory: 'build'
+    displayName: 'Build CVC4'
+
+  - script: ctest -j$(nproc) --output-on-failure
+    workingDirectory: 'build'
+    displayName: 'Run CTest'
+
+    #- job: macOS
+    #  pool:
+    #   vmImage: 'macos-10.13'
+    #  strategy:
+    #    matrix:
+    #      production:
+    #        cvc4Config: ''
+    #      production_clang:
+    #        cvc4Config: ''
+    #        cvc4ConfigEnv: 'CC=clang CXX=clang++'
+    #      debug:
+    #        cvc4Config: '-g'
+    #      python3:
+    #        needCython: true
+    #        cvc4Config: '--python --py3'
+    #  steps:
+    #  - script: echo "##vso[task.setvariable variable=ncpus]$(sysctl -n hw.logicalcpu)"
+    #    displayName: 'Determine number of CPUs'
+    #
+    #  - bash: |
+    #      brew install ccache
+    #      echo "##vso[task.prependpath]/usr/local/opt/ccache/libexec"
+    #    displayName: 'Install ccache'
+    #
+    #  - task: CacheBeta@0
+    #    inputs:
+    #        key: $(Agent.OS)
+    #        path: $(CCACHE_DIR)
+    #    displayName: ccache
+    #
+    #  - script: sudo pip3 install cython
+    #    condition: eq(variables.needCython, true)
+    #    displayName: 'Install Cython'
+    #
+    #  - script: echo ""
+    #    displayName: 'Setup dependencies'
+    #
+    #  - script: echo ""
+    #    displayName: 'Configure CVC4'
+    #
+    #  - script: make -j $(ncpus)
+    #    workingDirectory: 'build'
+    #    displayName: 'Build CVC4'
+    #
+    #  - script: ctest -j$(ncpus) --output-on-failure
+    #    workingDirectory: 'build'
+    #    displayName: 'Run CTest'
