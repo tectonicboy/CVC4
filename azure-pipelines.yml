@@ -65,7 +65,9 @@ jobs:
     workingDirectory: 'build'
     displayName: 'Build CVC4'
 
-  - script: make -j$(nproc) check ARGS='-LE regress[1-4]' CVC4_REGRESSION_ARGS='--no-early-exit'
+  - script: make -j$(nproc) check ARGS='-LE regress[1-4]'
+    env:
+      CVC4_REGRESSION_ARGS: '--no-early-exit'
     workingDirectory: 'build'
     displayName: 'Run tests'
 
