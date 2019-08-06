@@ -4,11 +4,13 @@ if(Boost_FOUND)
     "sets_translate.cpp" "${EXAMPLES_SETS_TRANSLATE_LINK_LIBS}" "sets-translate"
     # argument to binary (for testing)
     ${CMAKE_CURRENT_SOURCE_DIR}/sets-translate-example-input.smt2)
+  target_include_directories(sets2arrays PRIVATE ${Boost_INCLUDE_DIRS})
 
   cvc4_add_example(sets2axioms
     "sets_translate.cpp" "${EXAMPLES_SETS_TRANSLATE_LINK_LIBS}" "sets-translate"
     # argument to binary (for testing)
     ${CMAKE_CURRENT_SOURCE_DIR}/sets-translate-example-input.smt2)
   target_compile_definitions(sets2axioms PRIVATE -DENABLE_AXIOMS)
+  target_include_directories(sets2axioms PRIVATE ${Boost_INCLUDE_DIRS})
 endif()
 
