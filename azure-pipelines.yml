@@ -25,10 +25,11 @@ jobs:
         environment: 'CC=clang CXX=clang++'
         installCheck: false
         cacheKey: 'debug-clang'
-#      debug_cln:
-#        cvc4Config: 'debug --language-bindings=java --no-debug-symbols --gpl --cln'
-#        cvc4ConfigEnv: ''
-#        installCheck: false
+      debug_cln:
+        config: 'debug --lfsc --cadical --cryptominisat --symfpu --language-bindings=java --no-debug-symbols --gpl --cln'
+        environment: ''
+        installCheck: false
+        cacheKey: 'debug-gcc'
   steps:
   - script: |
       sudo apt-get update
@@ -47,6 +48,8 @@ jobs:
       echo "##vso[task.prependpath]/usr/lib/ccache"
     displayName: 'Install dependencies via apt-get'
 
+  # Note: Caching does not yet play nicely with ccache since caches are
+  #       immutable. For now we have a cache for each OS/cacheKey (per branch).
   - task: CacheBeta@0
     inputs:
         key: $(Agent.OS) | $(cacheKey)
