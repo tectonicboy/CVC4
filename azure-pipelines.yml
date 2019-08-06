@@ -21,7 +21,6 @@ jobs:
 #        cvc4ConfigEnv: ''
   steps:
   - script: |
-      ls /usr/local/share/boost/1.69.0/include
       sudo apt-get update
       sudo apt-get install -y \
         antlr3 \
@@ -62,9 +61,9 @@ jobs:
               $(cvc4Config)
     displayName: 'Configure CVC4'
 
-#  - script: make -j $(nproc)
-#    workingDirectory: 'build'
-#    displayName: 'Build CVC4'
+  - script: make -j $(nproc)
+    workingDirectory: 'build'
+    displayName: 'Build CVC4'
 
   - script: make -j$(nproc) check ARGS='-LE regress[1-4]' CVC4_REGRESSION_ARGS='--no-early-exit'
     workingDirectory: 'build'
