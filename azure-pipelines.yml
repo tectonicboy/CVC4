@@ -11,33 +11,26 @@ jobs:
   strategy:
     matrix:
       production:
-        cvc4Config: 'production --lfsc --cadical --cryptominisat --language-bindings=java'
-        cvc4ConfigEnv: ''
+        config: 'production --lfsc --cadical --cryptominisat --language-bindings=java'
+        environment: ''
         installCheck: true
+        cacheKey: 'production-gcc'
       debug:
-        cvc4Config: 'debug --lfsc --cadical --cryptominisat --symfpu --language-bindings=java --no-debug-symbols'
-        cvc4ConfigEnv: ''
+        config: 'debug --lfsc --cadical --cryptominisat --symfpu --language-bindings=java --no-debug-symbols'
+        environment: ''
         installCheck: false
+        cacheKey: 'debug-gcc'
       debug_clang:
-        cvc4Config: 'debug --lfsc --cadical --cryptominisat --symfpu --language-bindings=java --no-debug-symbols'
-        cvc4ConfigEnv: 'CC=clang CXX=clang++'
+        config: 'debug --lfsc --cadical --cryptominisat --symfpu --language-bindings=java --no-debug-symbols'
+        environment: 'CC=clang CXX=clang++'
         installCheck: false
+        cacheKey: 'debug-clang'
 #      debug_cln:
 #        cvc4Config: 'debug --language-bindings=java --no-debug-symbols --gpl --cln'
 #        cvc4ConfigEnv: ''
 #        installCheck: false
   steps:
   - script: |
-      echo "*********************"
-      echo -n "Build.DefinitionId: "
-      echo $(Build.DefinitionId)
-      echo -n "Build.DefinitionName: "
-      echo $(Build.Build.DefinitionName)
-      echo -n "Build.BuildNumber: "
-      echo $(Build.BuildNumber)
-      echo -n "Build.BuildId: "
-      echo $(Build.BuildId)
-      echo "*********************"
       sudo apt-get update
       sudo apt-get install -y \
         antlr3 \
@@ -56,7 +49,7 @@ jobs:
 
   - task: CacheBeta@0
     inputs:
-        key: $(Agent.OS)
+        key: $(Agent.OS) | $(cacheKey)
         path: $(CCACHE_DIR)
     displayName: ccache
 
@@ -72,10 +65,9 @@ jobs:
       ./contrib/get-cryptominisat
     displayName: 'Setup dependencies'
 
-  - script: $(cvc4ConfigEnv) ./configure.sh
+  - script: $(environment) ./configure.sh $(config)
               --prefix=$(pwd)/build/install
               --unit-testing
-              $(cvc4Config)
     displayName: 'Configure CVC4'
 
   - script: make -j $(nproc)
