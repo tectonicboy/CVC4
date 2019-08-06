@@ -16,6 +16,9 @@ jobs:
       debug_gmp:
         cvc4Config: 'debug --language-bindings=java --no-debug-symbols'
         cvc4ConfigEnv: ''
+      debug_gmp_clang:
+        cvc4Config: 'debug --language-bindings=java --no-debug-symbols'
+        cvc4ConfigEnv: 'CC=clang CXX=clang++'
 #      debug_cln:
 #        cvc4Config: 'debug --language-bindings=java --no-debug-symbols --gpl --cln'
 #        cvc4ConfigEnv: ''
