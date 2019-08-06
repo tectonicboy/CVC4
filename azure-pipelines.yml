@@ -20,21 +20,12 @@ jobs:
 #        cvc4Config: 'debug --language-bindings=java --no-debug-symbols --gpl --cln'
 #        cvc4ConfigEnv: ''
   steps:
-  - bash: |
-      sudo apt-get install ccache -y
-      echo "##vso[task.prependpath]/usr/lib/ccache"
-    displayName: 'Install ccache'
-
-  - task: CacheBeta@0
-    inputs:
-        key: $(Agent.OS)
-        path: $(CCACHE_DIR)
-    displayName: ccache
-
   - script: |
+      ls /usr/local/share/boost/1.69.0/include
       sudo apt-get update
       sudo apt-get install -y \
         antlr3 \
+        ccache \
         cmake \
         cxxtest \
         junit4 \
@@ -44,7 +35,14 @@ jobs:
         libhamcrest-java \
         openjdk-8-jdk \
         swig3.0
+      echo "##vso[task.prependpath]/usr/lib/ccache"
     displayName: 'Install dependencies via apt-get'
+
+  - task: CacheBeta@0
+    inputs:
+        key: $(Agent.OS)
+        path: $(CCACHE_DIR)
+    displayName: ccache
 
   - script: sudo pip install -U cython
     condition: eq(variables.needCython, true)
@@ -64,9 +62,9 @@ jobs:
               $(cvc4Config)
     displayName: 'Configure CVC4'
 
-  - script: make -j $(nproc)
-    workingDirectory: 'build'
-    displayName: 'Build CVC4'
+#  - script: make -j $(nproc)
+#    workingDirectory: 'build'
+#    displayName: 'Build CVC4'
 
   - script: make -j$(nproc) check ARGS='-LE regress[1-4]' CVC4_REGRESSION_ARGS='--no-early-exit'
     workingDirectory: 'build'
