@@ -28,6 +28,16 @@ jobs:
 #        installCheck: false
   steps:
   - script: |
+      echo "*********************"
+      echo -n "Build.DefinitionId: "
+      echo $(Build.DefinitionId)
+      echo -n "Build.DefinitionName: "
+      echo $(Build.Build.DefinitionName)
+      echo -n "Build.BuildNumber: "
+      echo $(Build.BuildNumber)
+      echo -n "Build.BuildId: "
+      echo $(Build.BuildId)
+      echo "*********************"
       sudo apt-get update
       sudo apt-get install -y \
         antlr3 \
