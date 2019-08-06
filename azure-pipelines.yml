@@ -57,10 +57,10 @@ jobs:
       ./contrib/get-cryptominisat
     displayName: 'Setup dependencies'
 
-  - script: $(cvc4ConfigEnv) ./configure.sh \
-              --lfsc --cadical --cryptominisat \
-              --prefix=$(pwd)/build/install \
-              --unit-testing \
+  - script: $(cvc4ConfigEnv) ./configure.sh
+              --lfsc --cadical --cryptominisat
+              --prefix=$(pwd)/build/install
+              --unit-testing
               $(cvc4Config)
     displayName: 'Configure CVC4'
 
