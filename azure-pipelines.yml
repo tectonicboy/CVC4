@@ -15,21 +15,25 @@ jobs:
         environment: ''
         installCheck: true
         cacheKey: 'production-gcc'
+        excludeTestPattern: '-LE regress[3-4]'
       debug:
         config: 'debug --lfsc --cadical --cryptominisat --symfpu --language-bindings=java --no-debug-symbols'
         environment: ''
         installCheck: false
         cacheKey: 'debug-gcc'
+        excludeTestPattern: '-LE regress[1-4]'
       debug_clang:
         config: 'debug --lfsc --cadical --cryptominisat --symfpu --language-bindings=java --no-debug-symbols'
         environment: 'CC=clang CXX=clang++'
         installCheck: false
         cacheKey: 'debug-clang'
+        excludeTestPattern: '-LE regress[1-4]'
       debug_cln:
         config: 'debug --lfsc --cadical --cryptominisat --symfpu --language-bindings=java --no-debug-symbols --gpl --cln'
         environment: ''
         installCheck: false
         cacheKey: 'debug-gcc'
+        excludeTestPattern: '-LE regress[1-4]'
   steps:
   - script: |
       sudo apt-get update
@@ -77,8 +81,9 @@ jobs:
     workingDirectory: 'build'
     displayName: 'Build CVC4'
 
-  - script: make -j$(nproc) check ARGS='-LE regress[1-4]'
+  - script: make -j$(nproc) check
     env:
+      ARGS: $(excludeTestPattern)
       CVC4_REGRESSION_ARGS: '--no-early-exit'
     workingDirectory: 'build'
     displayName: 'Run regression/unit tests'
