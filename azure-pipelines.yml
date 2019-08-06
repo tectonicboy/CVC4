@@ -11,9 +11,14 @@ jobs:
   strategy:
     matrix:
       production:
-        cvc4Config: 'production'
-      debug:
-        cvc4Config: 'debug'
+        cvc4Config: 'production --language-bindings=java'
+        cvc4ConfigEnv: ''
+      debug_gmp:
+        cvc4Config: 'debug --language-bindings=java --no-debug-symbols --gmp'
+        cvc4ConfigEnv: ''
+      debug_cln:
+        cvc4Config: 'debug --language-bindings=java --no-debug-symbols --gpl --cln'
+        cvc4ConfigEnv: ''
   steps:
   - bash: |
       sudo apt-get install ccache -y
@@ -39,25 +44,33 @@ jobs:
         libhamcrest-java \
         openjdk-8-jdk \
         swig3.0
-    displayName: 'apt-get'
+    displayName: 'Install dependencies via apt-get'
 
   - script: sudo pip install -U cython
     condition: eq(variables.needCython, true)
     displayName: 'Install Cython'
 
-  - script: echo ""
+  - script: |
+      ./contrib/get-symfpu
+      ./contrib/get-lfsc-checker
+      ./contrib/get-cadical
+      ./contrib/get-cryptominisat
     displayName: 'Setup dependencies'
 
-  - script: $(cvc4ConfigEnv) ./configure.sh $(cvc4Config)
+  - script: $(cvc4ConfigEnv) ./configure.sh \
+              --lfsc --cadical --cryptominisat \
+              --prefix=$(pwd)/build/install \
+              --unit-testing \
+              $(cvc4Config)
     displayName: 'Configure CVC4'
 
   - script: make -j $(nproc)
     workingDirectory: 'build'
     displayName: 'Build CVC4'
 
-  - script: ctest -j$(nproc) --output-on-failure
+  - script: make -j$(nproc) check ARGS='-LE regress[1-4]'
     workingDirectory: 'build'
-    displayName: 'Run CTest'
+    displayName: 'Run tests'
 
     #- job: macOS
     #  pool:
