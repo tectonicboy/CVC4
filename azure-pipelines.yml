@@ -14,11 +14,11 @@ jobs:
         cvc4Config: 'production --language-bindings=java'
         cvc4ConfigEnv: ''
       debug_gmp:
-        cvc4Config: 'debug --language-bindings=java --no-debug-symbols --gmp'
+        cvc4Config: 'debug --language-bindings=java --no-debug-symbols'
         cvc4ConfigEnv: ''
-      debug_cln:
-        cvc4Config: 'debug --language-bindings=java --no-debug-symbols --gpl --cln'
-        cvc4ConfigEnv: ''
+#      debug_cln:
+#        cvc4Config: 'debug --language-bindings=java --no-debug-symbols --gpl --cln'
+#        cvc4ConfigEnv: ''
   steps:
   - bash: |
       sudo apt-get install ccache -y
@@ -32,6 +32,8 @@ jobs:
     displayName: ccache
 
   - script: |
+      ls /usr/include/
+      ls /usr/include/boost
       sudo apt-get update
       sudo apt-get install -y \
         antlr3 \
@@ -68,7 +70,7 @@ jobs:
     workingDirectory: 'build'
     displayName: 'Build CVC4'
 
-  - script: make -j$(nproc) check ARGS='-LE regress[1-4]'
+  - script: make -j$(nproc) check ARGS='-LE regress[1-4]' CVC4_REGRESSION_ARGS='--no-early-exit'
     workingDirectory: 'build'
     displayName: 'Run tests'
 
