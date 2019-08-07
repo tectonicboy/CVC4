@@ -111,7 +111,7 @@ jobs:
         config: 'production --lfsc --cadical --cryptominisat --language-bindings=java'
         environment: ''
         installCheck: true
-        cacheKey: 'production-gcc'
+        cacheKey: 'production-clang'
         excludeTestPattern: '-LE regress[3-4]'
 #      debug:
 #        config: 'debug --lfsc --cadical --cryptominisat --symfpu --language-bindings=java --no-debug-symbols'
@@ -183,7 +183,7 @@ jobs:
       make install -j$(ncpus)
       echo "#include <cvc4/cvc4.h>" > install_check.cpp
       echo "int main() { CVC4::ExprManager em; return 0; }" >> install_check.cpp
-      g++ -std=c++11 install_check.cpp -I install/include -L install/lib -lcvc4
+      clang++ -std=c++11 install_check.cpp -I install/include -L install/lib -lcvc4
     condition: eq(variables.installCheck, true)
     workingDirectory: 'build'
     displayName: 'Install Check'
