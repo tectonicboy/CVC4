@@ -136,7 +136,7 @@ jobs:
     displayName: 'Determine number of CPUs'
 
   - bash: |
-      brew install ccache
+      brew install ccache gmp swig
       echo "##vso[task.prependpath]/usr/local/opt/ccache/libexec"
     displayName: 'Install ccache'
 
@@ -152,6 +152,7 @@ jobs:
 
 
   - script: |
+      ./contrib/get-antlr-3.4
       ./contrib/get-symfpu
       ./contrib/get-lfsc-checker
       ./contrib/get-cadical
