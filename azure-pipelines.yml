@@ -4,7 +4,7 @@ trigger:
 variables:
   CCACHE_DIR: $(Pipeline.Workspace)/ccache
 
-jobs:
+##jobs:
 ##- job: Linux
 ##  pool:
 ##   vmImage: 'ubuntu-16.04'
@@ -101,7 +101,7 @@ jobs:
 ##    workingDirectory: 'build'
 ##    displayName: 'Install Check'
 
-
+jobs:
 - job: macOS
   pool:
    vmImage: 'macos-10.13'
