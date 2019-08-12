@@ -179,11 +179,11 @@ jobs:
     workingDirectory: 'build'
     displayName: 'Run examples'
 
-  - script: |
-      make install -j$(ncpus)
-      echo "#include <cvc4/cvc4.h>" > install_check.cpp
-      echo "int main() { CVC4::ExprManager em; return 0; }" >> install_check.cpp
-      clang++ -std=c++11 install_check.cpp -I $(pwd)/install/include -L $(pwd)/install/lib -lcvc4
-    condition: eq(variables.installCheck, true)
-    workingDirectory: 'build'
-    displayName: 'Install Check'
+#  - script: |
+#      make install -j$(ncpus)
+#      echo "#include <cvc4/cvc4.h>" > install_check.cpp
+#      echo "int main() { CVC4::ExprManager em; return 0; }" >> install_check.cpp
+#      clang++ -std=c++11 install_check.cpp -I install/include -L install/lib -lcvc4
+#    condition: eq(variables.installCheck, true)
+#    workingDirectory: 'build'
+#    displayName: 'Install Check'
