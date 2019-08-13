@@ -101,7 +101,6 @@ jobs:
     workingDirectory: 'build'
     displayName: 'Install Check'
 
-jobs:
 - job: macOS
   pool:
    vmImage: 'macos-10.13'
