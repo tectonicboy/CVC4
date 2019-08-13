@@ -4,102 +4,102 @@ trigger:
 variables:
   CCACHE_DIR: $(Pipeline.Workspace)/ccache
 
-##jobs:
-##- job: Linux
-##  pool:
-##   vmImage: 'ubuntu-16.04'
-##  strategy:
-##    matrix:
-##      production:
-##        config: 'production --lfsc --cadical --cryptominisat --language-bindings=java'
-##        environment: ''
-##        installCheck: true
-##        cacheKey: 'production-gcc'
-##        excludeTestPattern: '-LE regress[3-4]'
-##      debug:
-##        config: 'debug --lfsc --cadical --cryptominisat --symfpu --language-bindings=java --no-debug-symbols'
-##        environment: ''
-##        installCheck: false
-##        cacheKey: 'debug-gcc'
-##        excludeTestPattern: '-LE regress[1-4]'
-##      debug_clang:
-##        config: 'debug --lfsc --cadical --cryptominisat --symfpu --language-bindings=java --no-debug-symbols'
-##        environment: 'CC=clang CXX=clang++'
-##        installCheck: false
-##        cacheKey: 'debug-clang'
-##        excludeTestPattern: '-LE regress[1-4]'
-##      debug_cln:
-##        config: 'debug --lfsc --cadical --cryptominisat --symfpu --language-bindings=java --no-debug-symbols --gpl --cln'
-##        environment: ''
-##        installCheck: false
-##        cacheKey: 'debug-gcc-cln'
-##        excludeTestPattern: '-LE regress[1-4]'
-##  steps:
-##  - script: |
-##      sudo apt-get update
-##      sudo apt-get install -y \
-##        antlr3 \
-##        ccache \
-##        cmake \
-##        cxxtest \
-##        junit4 \
-##        libantlr3c-dev \
-##        libcln-dev \
-##        libgmp-dev \
-##        libhamcrest-java \
-##        openjdk-8-jdk \
-##        swig3.0
-##      echo "##vso[task.prependpath]/usr/lib/ccache"
-##    displayName: 'Install package dependencies'
-##
-##  # Note: Caching does not yet play nicely with ccache since caches are
-##  #       immutable. For now we have a cache for each OS/cacheKey (per branch).
-##  - task: CacheBeta@0
-##    inputs:
-##        key: $(Agent.OS) | $(cacheKey)
-##        path: $(CCACHE_DIR)
-##    displayName: ccache
-##
-### Note: Required for the new Python API
-###  - script: sudo pip install -U cython
-###    condition: eq(variables.needCython, true)
-###    displayName: 'Install Cython'
-##
-##  - script: |
-##      ./contrib/get-symfpu
-##      ./contrib/get-lfsc-checker
-##      ./contrib/get-cadical
-##      ./contrib/get-cryptominisat
-##    displayName: 'Setup CVC4 dependencies'
-##
-##  - script: $(environment) ./configure.sh $(config)
-##              --prefix=$(pwd)/build/install
-##              --unit-testing
-##    displayName: 'Configure CVC4'
-##
-##  - script: make -j $(nproc)
-##    workingDirectory: 'build'
-##    displayName: 'Build CVC4'
-##
-##  - script: make -j$(nproc) check
-##    env:
-##      ARGS: $(excludeTestPattern)
-##      CVC4_REGRESSION_ARGS: '--no-early-exit'
-##    workingDirectory: 'build'
-##    displayName: 'Run regression/unit tests'
-##
-##  - script: ctest -j$(nproc) -L example
-##    workingDirectory: 'build'
-##    displayName: 'Run examples'
-##
-##  - script: |
-##      make install -j$(nproc)
-##      echo "#include <cvc4/cvc4.h>" > install_check.cpp
-##      echo "int main() { CVC4::ExprManager em; return 0; }" >> install_check.cpp
-##      g++ -std=c++11 install_check.cpp -I install/include -L install/lib -lcvc4
-##    condition: eq(variables.installCheck, true)
-##    workingDirectory: 'build'
-##    displayName: 'Install Check'
+jobs:
+- job: Linux
+  pool:
+   vmImage: 'ubuntu-16.04'
+  strategy:
+    matrix:
+      production:
+        config: 'production --lfsc --cadical --cryptominisat --language-bindings=java'
+        environment: ''
+        installCheck: true
+        cacheKey: 'production-gcc'
+        excludeTestPattern: '-LE regress[3-4]'
+      debug:
+        config: 'debug --lfsc --cadical --cryptominisat --symfpu --language-bindings=java --no-debug-symbols'
+        environment: ''
+        installCheck: false
+        cacheKey: 'debug-gcc'
+        excludeTestPattern: '-LE regress[1-4]'
+      debug_clang:
+        config: 'debug --lfsc --cadical --cryptominisat --symfpu --language-bindings=java --no-debug-symbols'
+        environment: 'CC=clang CXX=clang++'
+        installCheck: false
+        cacheKey: 'debug-clang'
+        excludeTestPattern: '-LE regress[1-4]'
+      debug_cln:
+        config: 'debug --lfsc --cadical --cryptominisat --symfpu --language-bindings=java --no-debug-symbols --gpl --cln'
+        environment: ''
+        installCheck: false
+        cacheKey: 'debug-gcc-cln'
+        excludeTestPattern: '-LE regress[1-4]'
+  steps:
+  - script: |
+      sudo apt-get update
+      sudo apt-get install -y \
+        antlr3 \
+        ccache \
+        cmake \
+        cxxtest \
+        junit4 \
+        libantlr3c-dev \
+        libcln-dev \
+        libgmp-dev \
+        libhamcrest-java \
+        openjdk-8-jdk \
+        swig3.0
+      echo "##vso[task.prependpath]/usr/lib/ccache"
+    displayName: 'Install package dependencies'
+
+  # Note: Caching does not yet play nicely with ccache since caches are
+  #       immutable. For now we have a cache for each OS/cacheKey (per branch).
+  - task: CacheBeta@0
+    inputs:
+        key: $(Agent.OS) | $(cacheKey)
+        path: $(CCACHE_DIR)
+    displayName: ccache
+
+# Note: Required for the new Python API
+#  - script: sudo pip install -U cython
+#    condition: eq(variables.needCython, true)
+#    displayName: 'Install Cython'
+
+  - script: |
+      ./contrib/get-symfpu
+      ./contrib/get-lfsc-checker
+      ./contrib/get-cadical
+      ./contrib/get-cryptominisat
+    displayName: 'Setup CVC4 dependencies'
+
+  - script: $(environment) ./configure.sh $(config)
+              --prefix=$(pwd)/build/install
+              --unit-testing
+    displayName: 'Configure CVC4'
+
+  - script: make -j $(nproc)
+    workingDirectory: 'build'
+    displayName: 'Build CVC4'
+
+  - script: make -j$(nproc) check
+    env:
+      ARGS: $(excludeTestPattern)
+      CVC4_REGRESSION_ARGS: '--no-early-exit'
+    workingDirectory: 'build'
+    displayName: 'Run regression/unit tests'
+
+  - script: ctest -j$(nproc) -L example
+    workingDirectory: 'build'
+    displayName: 'Run examples'
+
+  - script: |
+      make install -j$(nproc)
+      echo "#include <cvc4/cvc4.h>" > install_check.cpp
+      echo "int main() { CVC4::ExprManager em; return 0; }" >> install_check.cpp
+      g++ -std=c++11 install_check.cpp -I install/include -L install/lib -lcvc4
+    condition: eq(variables.installCheck, true)
+    workingDirectory: 'build'
+    displayName: 'Install Check'
 
 jobs:
 - job: macOS
