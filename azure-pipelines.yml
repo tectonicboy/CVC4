@@ -88,10 +88,6 @@ jobs:
     workingDirectory: 'build'
     displayName: 'Run regression/unit tests'
 
-  - script: ctest -j$(nproc) -L example
-    workingDirectory: 'build'
-    displayName: 'Run examples'
-
   - script: |
       make install -j$(nproc)
       echo "#include <cvc4/cvc4.h>" > install_check.cpp
@@ -100,6 +96,19 @@ jobs:
     condition: eq(variables.installCheck, true)
     workingDirectory: 'build'
     displayName: 'Install Check'
+
+  - script: |
+      mkdir build
+      cd build
+      cmake .. -DCMAKE_PREFIX_PATH=$(pwd)/../../build/install/lib/cmake
+      make -j$(nproc)
+    workingDirectory: 'examples'
+    displayName: 'Build examples'
+
+  - script: ctest -j$(nproc) --output-on-failure
+    workingDirectory: 'examples/build'
+    displayName: 'Run examples'
+
 
 - job: macOS
   pool:
@@ -174,10 +183,6 @@ jobs:
     workingDirectory: 'build'
     displayName: 'Run regression/unit tests'
 
-  - script: ctest -j$(ncpus) -L example
-    workingDirectory: 'build'
-    displayName: 'Run examples'
-
   - script: |
       make install -j$(ncpus)
       echo "#include <cvc4/cvc4.h>" > install_check.cpp
@@ -186,3 +191,15 @@ jobs:
     condition: eq(variables.installCheck, true)
     workingDirectory: 'build'
     displayName: 'Install Check'
+
+  - script: |
+      mkdir build
+      cd build
+      cmake .. -DCMAKE_PREFIX_PATH=$(pwd)/../../build/install/lib/cmake
+      make -j$(ncpus)
+    workingDirectory: 'examples'
+    displayName: 'Build examples'
+
+  - script: ctest -j$(ncpus) --output-on-failure
+    workingDirectory: 'examples/build'
+    displayName: 'Run examples'
