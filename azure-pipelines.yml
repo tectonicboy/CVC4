@@ -97,17 +97,17 @@ jobs:
     workingDirectory: 'build'
     displayName: 'Install Check'
 
-  - script: |
-      mkdir build
-      cd build
-      cmake .. -DCMAKE_PREFIX_PATH=$(pwd)/../../build/install/lib/cmake
-      make -j$(nproc)
-    workingDirectory: 'examples'
-    displayName: 'Build examples'
-
-  - script: ctest -j$(nproc) --output-on-failure
-    workingDirectory: 'examples/build'
-    displayName: 'Run examples'
+#  - script: |
+#      mkdir build
+#      cd build
+#      cmake .. -DCMAKE_PREFIX_PATH=$(pwd)/../../build/install/lib/cmake
+#      make -j$(nproc)
+#    workingDirectory: 'examples'
+#    displayName: 'Build examples'
+#
+#  - script: ctest -j$(nproc) --output-on-failure
+#    workingDirectory: 'examples/build'
+#    displayName: 'Run examples'
 
 
 - job: macOS
@@ -192,14 +192,14 @@ jobs:
     workingDirectory: 'build'
     displayName: 'Install Check'
 
-  - script: |
-      mkdir build
-      cd build
-      cmake .. -DCMAKE_PREFIX_PATH=$(pwd)/../../build/install/lib/cmake
-      make -j$(ncpus)
-    workingDirectory: 'examples'
-    displayName: 'Build examples'
-
-  - script: ctest -j$(ncpus) --output-on-failure
-    workingDirectory: 'examples/build'
-    displayName: 'Run examples'
+#  - script: |
+#      mkdir build
+#      cd build
+#      cmake .. -DCMAKE_PREFIX_PATH=$(pwd)/../../build/install/lib/cmake
+#      make -j$(ncpus)
+#    workingDirectory: 'examples'
+#    displayName: 'Build examples'
+#
+#  - script: ctest -j$(ncpus) --output-on-failure
+#    workingDirectory: 'examples/build'
+#    displayName: 'Run examples'
