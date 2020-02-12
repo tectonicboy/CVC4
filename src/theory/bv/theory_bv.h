@@ -187,7 +187,10 @@ public:
   std::unique_ptr<AbstractionModule> d_abstractionModule;
   bool d_isCoreTheory;
   bool d_calledPreregister;
-  
+
+  /** We track multipliers so they can be approximated */
+  context::CDHashSet<Node, NodeHashFunction> d_multipliers;
+
   //for extended functions
   bool d_needsLastCallCheck;
   context::CDHashSet<Node, NodeHashFunction> d_extf_range_infer;

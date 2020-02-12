@@ -75,6 +75,7 @@ TheoryBV::TheoryBV(context::Context* c,
       d_abstractionModule(new AbstractionModule(getStatsPrefix(THEORY_BV))),
       d_isCoreTheory(false),
       d_calledPreregister(false),
+      d_multipliers(u),
       d_needsLastCallCheck(false),
       d_extf_range_infer(u),
       d_extf_collapse_infer(u)
@@ -243,6 +244,12 @@ Node TheoryBV::expandDefinition(LogicRequest &logicRequest, Node node) {
 void TheoryBV::preRegisterTerm(TNode node) {
   d_calledPreregister = true;
   Debug("bitvector-preregister") << "TheoryBV::preRegister(" << node << ")" << std::endl;
+
+  if (node.getKind() == kind::BITVECTOR_MULT)
+  {
+    Trace("bitvector::TCMultiplier") << "Registering " << node << "\n";
+    d_multipliers.insert(node);
+  }
 
   if (options::bitblastMode() == options::BitblastMode::EAGER)
   {
