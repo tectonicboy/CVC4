@@ -395,6 +395,22 @@ void DefaultMultBB (TNode node, std::vector<T>& res, TBitblaster<T>* bb) {
 }
 
 template <class T>
+void OverApproximateMultBB (TNode node, std::vector<T>& res, TBitblaster<T>* bb) {
+  Debug("bitvector") << "theory::bv::OverApproximateMultBB bitblasting "<< node << "\n";
+  Assert(res.size() == 0 && node.getKind() == kind::BITVECTOR_MULT);
+
+  // Use the basic shift-add multiplier for all small multiplications
+  // i.e. bit-vectors who's width is under MultiplierAbstractionSizeLimit()
+  if (utils::getSize(node) > MultiplierAbstractionSizeLimit()) {
+    Trace("bitvector::TCMultiplier") << "Bit blast : approximating " << node << "\n";
+    DefaultVarBB<T>(node, res, bb);
+  } else {
+    Trace("bitvector::TCMultiplier") << "Bit blast : handling with shift-add " << node << "\n";
+    DefaultMultBB<T>(node, res, bb);
+  }
+}
+
+template <class T>
 void DefaultPlusBB (TNode node, std::vector<T>& res, TBitblaster<T>* bb) {
   Debug("bitvector-bb") << "theory::bv::DefaultPlusBB bitblasting " << node << "\n";
   Assert(node.getKind() == kind::BITVECTOR_PLUS && res.size() == 0);

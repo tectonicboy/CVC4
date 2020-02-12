@@ -52,6 +52,9 @@ class EagerBitblastSolver;
 
 class AbstractionModule;
 
+// At what size do we approximate and at what size do we just use shift-add?
+unsigned MultiplierAbstractionSizeLimit (void);
+
 class TheoryBV : public Theory {
 
   /** The context we are using */

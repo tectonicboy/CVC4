@@ -44,6 +44,11 @@ namespace CVC4 {
 namespace theory {
 namespace bv {
 
+unsigned MultiplierAbstractionSizeLimit (void) {
+  // For now, just set this to 8 but you can try with anything you like
+  return 8;
+}
+
 TheoryBV::TheoryBV(context::Context* c,
                    context::UserContext* u,
                    OutputChannel& out,
