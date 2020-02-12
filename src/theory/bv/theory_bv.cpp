@@ -831,6 +831,141 @@ Node TheoryBV::ppRewrite(TNode t)
 
 void TheoryBV::presolve() {
   Debug("bitvector") << "TheoryBV::presolve" << endl;
+
+  // Generate all static TC lemmas
+  // For multipliers that are not handled by shift-add, these need to constrain the result
+  // so that it is correct.
+  Trace("bitvector::TCMultiplier") << "Generating static lemmas\n";
+
+  for (auto i = d_multipliers.begin(); i != d_multipliers.end(); ++i) { // For each multiplier...
+
+    // Only generate constraints if it is too big to use shift-add
+    if (utils::getSize(*i) < MultiplierAbstractionSizeLimit()) {
+      Trace("bitvector::TCMultiplier") << "Too small " << *i << "\n";
+
+    } else {
+      // Note that this line outputs the actual node / expression
+      Trace("bitvector::TCMultiplier") << "Generating lemmas for " << *i << "\n";
+      NodeManager *nm = NodeManager::currentNM(); // This is used to make nodes!
+
+      // This only works for n = 12 and k = 3
+      unsigned n = 12;
+      unsigned k = 3;
+
+      // This is where you will need to improve things
+      Assert(utils::getSize(*i) == n);
+      Assert((*i).getNumChildren() == 2);  // Multiplication of two numbers!
+
+      Node result = *i;        // The result we are trying to compute
+      Node left = result[0];   // Left hand side of the input
+      Node right = result[1];  // Right hand side of the input
+
+      // k = 3 so split each input into it's three parts
+      Node leftLow = utils::mkExtract(left, 3, 0);
+      Node leftMid = utils::mkExtract(left, 7, 4);
+      Node leftHigh = utils::mkExtract(left, 11, 8);
+      Trace("bitvector::TCMultiplier") << "Left LSBs " << leftLow << "\n";
+      Trace("bitvector::TCMultiplier") << "Left Mid " << leftMid << "\n";
+      Trace("bitvector::TCMultiplier") << "Left MSBs " << leftHigh << "\n";
+
+      Node rightLow = utils::mkExtract(right, 3, 0);
+      Node rightMid = utils::mkExtract(right, 7, 4);
+      Node rightHigh = utils::mkExtract(right, 11, 8);
+      Trace("bitvector::TCMultiplier") << "Right LSBs " << rightLow << "\n";
+      Trace("bitvector::TCMultiplier") << "Right Mid " << rightMid << "\n";
+      Trace("bitvector::TCMultiplier") << "Right MSBs " << rightHigh << "\n";
+
+      // Create the 5 co-efficients
+      // This involves a certain amount of magic / deeper use of the APIs
+      // Don't worry if it doesn't make sense, the key parts are highlighted
+      std::vector<TypeNode> inputs(2);
+      inputs[0] = nm->mkBitVectorType(n);  // Note the use of n
+      inputs[1] = nm->mkBitVectorType(n);
+
+      unsigned coefficientSize = 8; // This will need to be set correctly and may not be the same for each
+
+      Node a = nm->mkNode(kind::APPLY_UF,
+			  nm->mkSkolem("TC_multiply_a",
+				       nm->mkFunctionType(inputs, nm->mkBitVectorType(coefficientSize)),
+				       "TC_multiply_a",
+				       NodeManager::SKOLEM_EXACT_NAME),
+			  left,
+			  right);
+      Trace("bitvector::TCMultiplier") << "x^4 coefficient " << a << "\n";
+
+       Node b = nm->mkNode(kind::APPLY_UF,
+			  nm->mkSkolem("TC_multiply_b",
+				       nm->mkFunctionType(inputs, nm->mkBitVectorType(coefficientSize)),
+				       "TC_multiply_b",
+				       NodeManager::SKOLEM_EXACT_NAME),
+			  left,
+			  right);
+      Trace("bitvector::TCMultiplier") << "x^3 coefficient " << b << "\n";
+
+      Node c = nm->mkNode(kind::APPLY_UF,
+			  nm->mkSkolem("TC_multiply_c",
+				       nm->mkFunctionType(inputs, nm->mkBitVectorType(coefficientSize)),
+				       "TC_multiply_c",
+				       NodeManager::SKOLEM_EXACT_NAME),
+			  left,
+			  right);
+      Trace("bitvector::TCMultiplier") << "x^2 coefficient " << c << "\n";
+
+      Node d = nm->mkNode(kind::APPLY_UF,
+			  nm->mkSkolem("TC_multiply_d",
+				       nm->mkFunctionType(inputs, nm->mkBitVectorType(coefficientSize)),
+				       "TC_multiply_d",
+				       NodeManager::SKOLEM_EXACT_NAME),
+			  left,
+			  right);
+      Trace("bitvector::TCMultiplier") << "x^1 coefficient " << d << "\n";
+
+      Node e = nm->mkNode(kind::APPLY_UF,
+			  nm->mkSkolem("TC_multiply_e",
+				       nm->mkFunctionType(inputs, nm->mkBitVectorType(coefficientSize)),
+				       "TC_multiply_e",
+				       NodeManager::SKOLEM_EXACT_NAME),
+			  left,
+			  right);
+      Trace("bitvector::TCMultiplier") << "x^0 coefficient " << e << "\n";
+
+
+      // Now build the constraints that correspond to the evaluation at each point
+
+      // Eval at 0
+      Node eval0left = utils::mkConcat(utils::mkZero(4),leftLow);    // Extend to 8 bit
+      Node eval0right = utils::mkConcat(utils::mkZero(4),rightLow);  // Extend to 8 bit
+
+      Node eval0product = nm->mkNode(kind::BITVECTOR_MULT, eval0left, eval0right);
+
+      Node eval0lemma = nm->mkNode(kind::EQUAL, eval0product, e);
+
+      Trace("bitvector::TCMultiplier") << "Adding lemma " << eval0lemma << "\n";
+      lemma(eval0lemma);
+
+      // Eval at 1
+      // ... to do ...
+
+
+      // Finally link the coefficients and the result
+      // Extend to the full 24 bits, then shift each one into place, finally add
+      unsigned padSize = 2*n - coefficientSize;
+      Node fullProduct =
+	nm->mkNode(kind::BITVECTOR_PLUS,
+		   nm->mkNode(kind::BITVECTOR_SHL, utils::mkConcat(utils::mkZero(padSize),a), utils::mkConst(2*n,16)),
+		   nm->mkNode(kind::BITVECTOR_SHL, utils::mkConcat(utils::mkZero(padSize),b), utils::mkConst(2*n,12)),
+		   nm->mkNode(kind::BITVECTOR_SHL, utils::mkConcat(utils::mkZero(padSize),c), utils::mkConst(2*n,8)),
+		   nm->mkNode(kind::BITVECTOR_SHL, utils::mkConcat(utils::mkZero(padSize),d), utils::mkConst(2*n,4)),
+		   nm->mkNode(kind::BITVECTOR_SHL, utils::mkConcat(utils::mkZero(padSize),e), utils::mkConst(2*n,0))
+		   );
+      Trace("bitvector::TCMultiplier") << "Full product expression " << fullProduct << "\n";
+
+      Node coefficientsToResultLemma =
+	nm->mkNode(kind::EQUAL, utils::mkExtract(fullProduct, n-1, 0), result);
+
+      Trace("bitvector::TCMultiplier") << "Link full product and result " << coefficientsToResultLemma << "\n";
+    }
+  }
 }
 
 static int prop_count = 0;
