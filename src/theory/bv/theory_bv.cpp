@@ -232,6 +232,13 @@ Node TheoryBV::expandDefinition(LogicRequest &logicRequest, Node node) {
   }
     break;
 
+  case kind::BITVECTOR_MULT:
+    if (utils::getSize(node) > MultiplierAbstractionSizeLimit()) {
+      logicRequest.widenLogic(THEORY_UF);
+    }
+    return node;
+    break;
+
   default:
     return node;
     break;
