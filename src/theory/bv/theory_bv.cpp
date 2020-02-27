@@ -836,6 +836,7 @@ void TheoryBV::presolve() {
   // For multipliers that are not handled by shift-add, these need to constrain the result
   // so that it is correct.
   Trace("bitvector::TCMultiplier") << "Generating static lemmas\n";
+  Trace("testTrace") << "CHANGES ARE WORKING!!!\n";
 
   for (auto i = d_multipliers.begin(); i != d_multipliers.end(); ++i) { // For each multiplier...
 
