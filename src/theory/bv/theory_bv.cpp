@@ -876,7 +876,7 @@ void TheoryBV::presolve() {
 			}
 			vec_limbs_A.push_back(utils::mkExtract(left, n-1, start_index));
 			vec_limbs_B.push_back(itils::mkExtract(right, n-1, start_index));
-       /*
+       
 			 k = 3 so split each input into it's three parts
        Node leftLow = utils::mkExtract(left, 3, 0);
        Node leftMid = utils::mkExtract(left, 7, 4);
@@ -891,7 +891,7 @@ void TheoryBV::presolve() {
       Trace("bitvector::TCMultiplier") << "Right LSBs " << rightLow << "\n";
       Trace("bitvector::TCMultiplier") << "Right Mid " << rightMid << "\n";
       Trace("bitvector::TCMultiplier") << "Right MSBs " << rightHigh << "\n";
-			*/
+			
 			
       // Create the 5 co-efficients
       // This involves a certain amount of magic / deeper use of the APIs
