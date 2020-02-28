@@ -973,8 +973,8 @@ void TheoryBV::presolve() {
       // Now build the constraints that correspond to the evaluation at each point
 
       // Eval at 0
-      Node eval0left = utils::mkConcat(utils::mkZero(4),leftLow);    // Extend to 8 bit
-      Node eval0right = utils::mkConcat(utils::mkZero(4),rightLow);  // Extend to 8 bit
+      Node eval0left = utils::mkConcat(utils::mkZero(coefficientSize - limb_size),leftLow);    // Extend to 8 bit
+      Node eval0right = utils::mkConcat(utils::mkZero(coefficientSize - limb_size),rightLow);  // Extend to 8 bit
 
       Node eval0product = nm->mkNode(kind::BITVECTOR_MULT, eval0left, eval0right);
 
