@@ -871,13 +871,17 @@ void TheoryBV::presolve() {
 			vector<Node> vec_limbs_A, vec_limbs_B;
 			
 			for(unsigned i = 1; i < k; ++i){
-				vec_limbs_A.push_back(utils::mkExtract(left, end_index, start_index));
-				vec_limbs_B.push_back(utils::mkExtract(right, end_index, start_index));
+				Node left_limb = utils::mkExtract(left, end_index, start_index);
+				Node right_limb = utils::mkExtract(right, end_index, start_index)
+				vec_limbs_A.push_back(left_limb);
+				vec_limbs_B.push_back(right_limb);
 				start_index += limb_size;
 				end_index += limb_size;
 			}
-			vec_limbs_A.push_back(utils::mkExtract(left, n-1, start_index));
-			vec_limbs_B.push_back(utils::mkExtract(right, n-1, start_index));
+	    		Node last_left_limb = utils::mkExtract(left, (n-1), start_index);
+	    		Node last_right_limb = utils::mkExtract(right, (n-1), start_index);
+			vec_limbs_A.push_back(last_left_limb);
+			vec_limbs_B.push_back(last_right_limb);
 			
 	    Trace("KevinsTrace") << "Left LSBs: " << vec_limbs_A[0] << "\n";
 			Trace("KevinsTrace") << "Left Mid: " << vec_limbs_A[1] << "\n";
