@@ -868,20 +868,19 @@ void TheoryBV::presolve() {
       Node left = result[0];   // Left hand side of the input
       Node right = result[1];  // Right hand side of the input
 			
-			vector<Node> vec_limbs_A, vec_limbs_B;
 			
-			for(unsigned i = 1; i < k; ++i){
-				Node left_limb = utils::mkExtract(left, end_index, start_index);
-				Node right_limb = utils::mkExtract(right, end_index, start_index);
-				vec_limbs_A.push_back(left_limb);
-				vec_limbs_B.push_back(right_limb);
+			Node limbs_A [255];
+	    		Node limbs_B [255];
+			for(unsigned i = 0; i < k-1; ++i){
+				limbs_A[i] = utils::mkExtract(left, end_index, start_index);
+				limbs_B[i] = utils::mkExtract(right, end_index, start_index);
 				start_index += limb_size;
 				end_index += limb_size;
 			}
-	    		Node last_left_limb = utils::mkExtract(left, (n-1), start_index);
-	    		Node last_right_limb = utils::mkExtract(right, (n-1), start_index);
-			vec_limbs_A.push_back(last_left_limb);
-			vec_limbs_B.push_back(last_right_limb);
+	    		//Node last_left_limb = utils::mkExtract(left, (n-1), start_index);
+	    		//Node last_right_limb = utils::mkExtract(right, (n-1), start_index);
+			limbs_A[k] = utils::mkExtract(left, (n-1), start_index);
+			limbs_B[k] = utils::mkExtract(right, (n-1), start_index);
 			
 	    Trace("KevinsTrace") << "Left LSBs: " << vec_limbs_A[0] << "\n";
 			Trace("KevinsTrace") << "Left Mid: " << vec_limbs_A[1] << "\n";
