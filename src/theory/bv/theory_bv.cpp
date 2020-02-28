@@ -36,6 +36,7 @@
 #include "theory/theory_model.h"
 #include "theory/valuation.h"
 
+
 using namespace CVC4::context;
 using namespace CVC4::theory::bv::utils;
 using namespace std;
@@ -849,9 +850,13 @@ void TheoryBV::presolve() {
       Trace("bitvector::TCMultiplier") << "Generating lemmas for " << *i << "\n";
       NodeManager *nm = NodeManager::currentNM(); // This is used to make nodes!
 
-      // This only works for n = 12 and k = 3
-      unsigned n = 12;
-      unsigned k = 3;
+      //Initialize crucial Toom-Cook values.
+      unsigned n, k, limb_size = ceil(n / k), start_index = 0, end_index = limb_size - 1;
+      Trace("bitvector::TCMultiplier") << "Please input n and k.\n";
+      cin >> n >> k;
+      Trace("bitvector::TCMultiplier") << "limb size = " << limb_size << "\n";
+	    
+      
 
       // This is where you will need to improve things
       Assert(utils::getSize(*i) == n);
@@ -860,22 +865,34 @@ void TheoryBV::presolve() {
       Node result = *i;        // The result we are trying to compute
       Node left = result[0];   // Left hand side of the input
       Node right = result[1];  // Right hand side of the input
-
-      // k = 3 so split each input into it's three parts
-      Node leftLow = utils::mkExtract(left, 3, 0);
-      Node leftMid = utils::mkExtract(left, 7, 4);
-      Node leftHigh = utils::mkExtract(left, 11, 8);
-      Trace("bitvector::TCMultiplier") << "Left LSBs " << leftLow << "\n";
-      Trace("bitvector::TCMultiplier") << "Left Mid " << leftMid << "\n";
-      Trace("bitvector::TCMultiplier") << "Left MSBs " << leftHigh << "\n";
-
+			
+			vector<Node> vec_limbs_A, vec_limbs_B;
+			
+			for(unsigned i = 1; i < k; ++i){
+				vec_limbs_A.push_back(utils::mkExtract(left, end_index, start_index));
+				vec_limbs_B.push_back(utils::mkExtract(right, end_index, start_index));
+				start_index += limb_size;
+				end_index += limb_size;
+			}
+			vec_limbs_A.push_back(utils::mkExtract(left, n-1, start_index));
+			vec_limbs_B.push_back(itils::mkExtract(right, n-1, start_index));
+       /*
+			 k = 3 so split each input into it's three parts
+       Node leftLow = utils::mkExtract(left, 3, 0);
+       Node leftMid = utils::mkExtract(left, 7, 4);
+       Node leftHigh = utils::mkExtract(left, 11, 8);
+       Trace("bitvector::TCMultiplier") << "Left LSBs " << leftLow << "\n";
+       Trace("bitvector::TCMultiplier") << "Left Mid " << leftMid << "\n";
+       Trace("bitvector::TCMultiplier") << "Left MSBs " << leftHigh << "\n";
+			 
       Node rightLow = utils::mkExtract(right, 3, 0);
       Node rightMid = utils::mkExtract(right, 7, 4);
       Node rightHigh = utils::mkExtract(right, 11, 8);
       Trace("bitvector::TCMultiplier") << "Right LSBs " << rightLow << "\n";
       Trace("bitvector::TCMultiplier") << "Right Mid " << rightMid << "\n";
       Trace("bitvector::TCMultiplier") << "Right MSBs " << rightHigh << "\n";
-
+			*/
+			
       // Create the 5 co-efficients
       // This involves a certain amount of magic / deeper use of the APIs
       // Don't worry if it doesn't make sense, the key parts are highlighted
@@ -883,8 +900,20 @@ void TheoryBV::presolve() {
       inputs[0] = nm->mkBitVectorType(n);  // Note the use of n
       inputs[1] = nm->mkBitVectorType(n);
 
-      unsigned coefficientSize = 8; // This will need to be set correctly and may not be the same for each
+      unsigned coefficientSize = (2*limb_size) + ceil(log2(k)); // This will need to be set correctly and may not be the same for each
 
+			
+		/*	vector<Node> coefficients;
+			for(unsigned i = 1; i < ((2*k) - 1); ++i){
+				coefficients.push_back(nm->mkNode(kind::APPLY_UF,
+			  nm->mkSkolem("TC_multiply_a",
+				       nm->mkFunctionType(inputs, nm->mkBitVectorType(coefficientSize)),
+				       "TC_multiply_a",
+				       NodeManager::SKOLEM_EXACT_NAME),
+			  left,
+			  right));
+			}
+			*/
       Node a = nm->mkNode(kind::APPLY_UF,
 			  nm->mkSkolem("TC_multiply_a",
 				       nm->mkFunctionType(inputs, nm->mkBitVectorType(coefficientSize)),
@@ -892,7 +921,7 @@ void TheoryBV::presolve() {
 				       NodeManager::SKOLEM_EXACT_NAME),
 			  left,
 			  right);
-      Trace("bitvector::TCMultiplier") << "x^4 coefficient " << a << "\n";
+      Trace("bitvector::TCMultiplier") << "x^4 coefficient " << coefficients[0] << "\n";
 
        Node b = nm->mkNode(kind::APPLY_UF,
 			  nm->mkSkolem("TC_multiply_b",
@@ -945,7 +974,7 @@ void TheoryBV::presolve() {
       lemma(eval0lemma);
 
       // Eval at 1
-      // ... to do ...
+      
 
 
       // Finally link the coefficients and the result
