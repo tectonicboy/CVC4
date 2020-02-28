@@ -851,7 +851,7 @@ void TheoryBV::presolve() {
       NodeManager *nm = NodeManager::currentNM(); // This is used to make nodes!
 
       //Initialize crucial Toom-Cook values.
-      unsigned n, k, limb_size, start_index = 0, end_index;;
+      unsigned n = 0, k = 0, limb_size = 0, start_index = 0, end_index = 0;
       Trace("KevinsTrace") << "Please input n and k.\n";
       cin >> n >> k;
 			double LS = n / k;
