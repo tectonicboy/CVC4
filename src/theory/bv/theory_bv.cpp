@@ -852,9 +852,9 @@ void TheoryBV::presolve() {
 
       //Initialize crucial Toom-Cook values.
       unsigned n, k, limb_size = ceil(n / k), start_index = 0, end_index = limb_size - 1;
-      Trace("bitvector::TCMultiplier") << "Please input n and k.\n";
+      Trace("KevinsTrace") << "Please input n and k.\n";
       cin >> n >> k;
-      Trace("bitvector::TCMultiplier") << "limb size = " << limb_size << "\n";
+      Trace("KevinsTrace") << "limb size = " << limb_size << "\n";
 	    
       
 
