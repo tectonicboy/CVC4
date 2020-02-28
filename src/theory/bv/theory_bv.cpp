@@ -877,7 +877,7 @@ void TheoryBV::presolve() {
 			vec_limbs_A.push_back(utils::mkExtract(left, n-1, start_index));
 			vec_limbs_B.push_back(itils::mkExtract(right, n-1, start_index));
        
-			 k = 3 so split each input into it's three parts
+	//k = 3 so split each input into it's three parts
        Node leftLow = utils::mkExtract(left, 3, 0);
        Node leftMid = utils::mkExtract(left, 7, 4);
        Node leftHigh = utils::mkExtract(left, 11, 8);
