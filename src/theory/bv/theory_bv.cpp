@@ -876,6 +876,10 @@ void TheoryBV::presolve() {
 			}
 			vec_limbs_A.push_back(utils::mkExtract(left, n-1, start_index));
 			vec_limbs_B.push_back(utils::mkExtract(right, n-1, start_index));
+			
+	    Trace("KevinsTrace") << "Left LSBs: " << vec_limbs_A[0] << "\n";
+			Trace("KevinsTrace") << "Left Mid: " << vec_limbs_A[1] << "\n";
+			Trace("KevinsTrace") << "Left MSBs: " << vec_limbs_A[2] << "\n";
        
 	//k = 3 so split each input into it's three parts
        Node leftLow = utils::mkExtract(left, 3, 0);
