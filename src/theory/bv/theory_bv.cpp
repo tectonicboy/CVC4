@@ -872,7 +872,7 @@ void TheoryBV::presolve() {
 			
 			for(unsigned i = 1; i < k; ++i){
 				Node left_limb = utils::mkExtract(left, end_index, start_index);
-				Node right_limb = utils::mkExtract(right, end_index, start_index)
+				Node right_limb = utils::mkExtract(right, end_index, start_index);
 				vec_limbs_A.push_back(left_limb);
 				vec_limbs_B.push_back(right_limb);
 				start_index += limb_size;
