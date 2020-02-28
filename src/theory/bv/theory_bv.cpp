@@ -921,7 +921,7 @@ void TheoryBV::presolve() {
 				       NodeManager::SKOLEM_EXACT_NAME),
 			  left,
 			  right);
-      Trace("bitvector::TCMultiplier") << "x^4 coefficient " << coefficients[0] << "\n";
+      Trace("bitvector::TCMultiplier") << "x^4 coefficient " << a << "\n";
 
        Node b = nm->mkNode(kind::APPLY_UF,
 			  nm->mkSkolem("TC_multiply_b",
