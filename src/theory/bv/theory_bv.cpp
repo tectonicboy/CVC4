@@ -870,8 +870,8 @@ void TheoryBV::presolve() {
       Node right = result[1];  // Right hand side of the input
 			
 			
-			Node limbs_A[255];
-	    		Node limbs_B[255];
+			vector<Node> limbs_A;
+	    		vector<Node> limbs_B;
 			for(unsigned i = 0; i < k-1; ++i){
 				limbs_A[i] = utils::mkExtract(left, end_index, start_index);
 				limbs_B[i] = utils::mkExtract(right, end_index, start_index);
@@ -890,7 +890,13 @@ void TheoryBV::presolve() {
 	    
 	    Node numberTen = utils::mkConst(4, 10);
 	    Trace("KevinsTrace") << "numberTen: " << numberTen << "\n";
+	    //Inputting points. Zero and infinity are always chosen by default.
+	    Trace("KevinsTrace") << "Please input " << ((2*k) - 3) << "points.\n";
+	    
+	    
+	    
 	//k = 3 so split each input into it's three parts
+	/*
        Node leftLow = utils::mkExtract(left, 3, 0);
        Node leftMid = utils::mkExtract(left, 7, 4);
        Node leftHigh = utils::mkExtract(left, 11, 8);
@@ -904,7 +910,7 @@ void TheoryBV::presolve() {
       Trace("bitvector::TCMultiplier") << "Right LSBs " << rightLow << "\n";
       Trace("bitvector::TCMultiplier") << "Right Mid " << rightMid << "\n";
       Trace("bitvector::TCMultiplier") << "Right MSBs " << rightHigh << "\n";
-			
+	*/		
 			
       // Create the 5 co-efficients
       // This involves a certain amount of magic / deeper use of the APIs
@@ -986,7 +992,7 @@ void TheoryBV::presolve() {
       Trace("bitvector::TCMultiplier") << "Adding lemma " << eval0lemma << "\n";
       lemma(eval0lemma);
 
-      // Eval at 1
+      // Eval in general
       
 
 
