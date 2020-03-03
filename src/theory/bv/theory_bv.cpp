@@ -887,6 +887,9 @@ void TheoryBV::presolve() {
 			Trace("KevinsTrace") << "Left Mid: " << limbs_A[1] << "\n";
 			Trace("KevinsTrace") << "Left MSBs: " << limbs_A[2] << "\n";
        
+	    
+	    Node numberTen = utils::mkConst(4, 10);
+	    Trace("KevinsTrace") << "numberTen: " << numberTen << "\n";
 	//k = 3 so split each input into it's three parts
        Node leftLow = utils::mkExtract(left, 3, 0);
        Node leftMid = utils::mkExtract(left, 7, 4);
