@@ -876,12 +876,14 @@ void TheoryBV::presolve() {
 	//Split the number into its libs.
 	vector<Node> limbs_A;
 	vector<Node> limbs_B;
+	Trace("KevinsTrace") << "Passing line 879.\n";
 	for(unsigned i = 0; i < k-1; ++i){
 		limbs_A[i] = utils::mkExtract(left, end_index, start_index);
 		limbs_B[i] = utils::mkExtract(right, end_index, start_index);
 		start_index += limb_size;
 		end_index += limb_size;
 	}
+	Trace("KevinsTrace") << "Passing line 886.\n";
 	    //Node last_left_limb = utils::mkExtract(left, (n-1), start_index);
 	    //Node last_right_limb = utils::mkExtract(right, (n-1), start_index);
 	limbs_A[k-1] = utils::mkExtract(left, (n-1), start_index);
