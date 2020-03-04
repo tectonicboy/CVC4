@@ -921,7 +921,7 @@ void TheoryBV::presolve() {
 		    }
 		    EvalProducts.push_back(nm->mkNode(kind::BITVECTOR_MULT, acc_A, acc_B));
 	    }
-	    
+	Trace("KevinsTrace") << "Last eval product: " << *(EvalProducts.end() - 1) << "\n";
 	//k = 3 so split each input into it's three parts
 	
        Node leftLow = utils::mkExtract(left, 3, 0);
