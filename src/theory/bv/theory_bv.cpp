@@ -881,17 +881,20 @@ void TheoryBV::presolve() {
 	vector<Node> limbs_B;
 	Trace("KevinsTrace") << "Passing line 882.\n";
 	for(unsigned i = 0; i < k-1; ++i){
-		limbs_A.push_back(utils::mkExtract(left, end_index, start_index));
-		limbs_B.push_back(utils::mkExtract(right, end_index, start_index));
+		limbs_A.push_back(utils::mkConcat(utils::mkZero(coefficientSize - limb_size), (utils::mkExtract(left, end_index, start_index)));
+		limbs_B.push_back(utils::mkConcat(utils::mkZero(coefficientSize - limb_size), (utils::mkExtract(right, end_index, start_index)));
 		start_index += limb_size;
 		end_index += limb_size;
 	}
 	Trace("KevinsTrace") << "Passing line 889.\n";
 	    //Node last_left_limb = utils::mkExtract(left, (n-1), start_index);
 	    //Node last_right_limb = utils::mkExtract(right, (n-1), start_index);
-	limbs_A.push_back(utils::mkExtract(left, (n-1), start_index));
-	limbs_B.push_back(utils::mkExtract(right, (n-1), start_index));
-			
+	unsigned last_limb_size = (k * (ceil(n/k))) - n;
+	limbs_A.push_back(utils::mkConcat(utils::mkZero(coefficientSize - last_limb_size), (utils::mkExtract(left, (n-1), start_index)));
+	limbs_A.push_back(utils::mkConcat(utils::mkZero(coefficientSize - last_limb_size), (utils::mkExtract(right, (n-1), start_index)));
+	
+	//Extend all limbs to coefficient size
+	
 	Trace("KevinsTrace") << "Left LSBs: " << limbs_A[0] << "\n";
 	Trace("KevinsTrace") << "Left Mid: " << limbs_A[1] << "\n";
 	Trace("KevinsTrace") << "Left MSBs: " << limbs_A[2] << "\n";
@@ -908,10 +911,21 @@ void TheoryBV::presolve() {
 		    points.push_back(utils::mkConst(coefficientSize, point));
 	    }
 	    //Evaluate at each point. Put the results in a vector<Node>.
+	    vector<Node> EvalProducts;
+	    
+	    //Eval at zero.
+	    Node eval_zero_A = *(limbs_A.begin());
+	    Node eval_zero_B = *(limbs_B.begin());
+	    EvalProducts.push_back(nm->mkNode(kind::BITVECTOR_MULT, eval_zero_A, eval_zero_B));
+	    
+	    //Eval at infinity.
+	    Node eval_inf_A = *(limbs_A.end() - 1);
+	    Node eval_inf_B = *(limbs_B.end() - 1);
+	    EvalProducts.push_back(nm->mkNode(kind::BITVECTOR_MULT, eval_inf_A, eval_inf_B));
 
- 	    vector<Node> EvalProducts;
-	    Node A_low = utils::mkConcat(utils::mkZero(coefficientSize - limb_size), limbs_A[0]);  
-            Node B_low = utils::mkConcat(utils::mkZero(coefficientSize - limb_size), limbs_B[0]);
+	    //Eval at all other points.
+	    Node A_low = limbs_A[0];  
+            Node B_low = limbs_B[0];
 	    for(unsigned i = 0; i <= ((2*k) - 4); ++i){
 		    Node temp_pt = points[i];
 		    Node temp_res_A = nm->mkNode(kind::BITVECTOR_MULT, temp_pt, limbs_A[1]);
