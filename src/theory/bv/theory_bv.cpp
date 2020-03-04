@@ -875,11 +875,9 @@ void TheoryBV::presolve() {
 		
 	    
 	    
-	Trace("KevinsTrace") << "Passing line 878.\n";
 	//Split the number into its limbs.
 	vector<Node> limbs_A;
 	vector<Node> limbs_B;
-	Trace("KevinsTrace") << "Passing line 882.\n";
 	for(unsigned i = 0; i < k-1; ++i){
 		limbs_A.push_back(utils::mkConcat
 				  (utils::mkZero(coefficientSize - limb_size),
@@ -891,10 +889,10 @@ void TheoryBV::presolve() {
 		start_index += limb_size;
 		end_index += limb_size;
 	}
-	Trace("KevinsTrace") << "Passing line 889.\n";
 	    //Node last_left_limb = utils::mkExtract(left, (n-1), start_index);
 	    //Node last_right_limb = utils::mkExtract(right, (n-1), start_index);
 	unsigned last_limb_size = (k * (ceil(n/k))) - n;
+	if(last_limb_size == 0) { last_limb_size = limb_size; }
 	limbs_A.push_back(utils::mkConcat(utils::mkZero
 					  (coefficientSize - last_limb_size), 
 					  (utils::mkExtract(left, (n-1), start_index))));
@@ -950,7 +948,11 @@ void TheoryBV::presolve() {
 		    }
 		    EvalProducts.push_back(nm->mkNode(kind::BITVECTOR_MULT, acc_A, acc_B));
 	    }
+	    
 	Trace("KevinsTrace") << "Last eval product: " << *(EvalProducts.end() - 1) << "\n";
+	    
+	    
+	    
 	//k = 3 so split each input into it's three parts
 	
        Node leftLow = utils::mkExtract(left, 3, 0);
