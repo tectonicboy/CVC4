@@ -996,7 +996,7 @@ void TheoryBV::presolve() {
 				       coef_name,
 				       NodeManager::SKOLEM_EXACT_NAME),
 			  left,
-			  right);
+			  right));
       }
     
       Node a = nm->mkNode(kind::APPLY_UF,
