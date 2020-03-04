@@ -881,8 +881,8 @@ void TheoryBV::presolve() {
 	vector<Node> limbs_B;
 	Trace("KevinsTrace") << "Passing line 879.\n";
 	for(unsigned i = 0; i < k-1; ++i){
-		limbs_A[i] = utils::mkExtract(left, end_index, start_index);
-		limbs_B[i] = utils::mkExtract(right, end_index, start_index);
+		limbs_A.push_back(utils::mkExtract(left, end_index, start_index));
+		limbs_B.push_back(utils::mkExtract(right, end_index, start_index));
 		start_index += limb_size;
 		end_index += limb_size;
 	}
