@@ -869,31 +869,57 @@ void TheoryBV::presolve() {
       Node left = result[0];   // Left hand side of the input
       Node right = result[1];  // Right hand side of the input
 			
+	//Split the number into its libs.
+	vector<Node> limbs_A;
+	    vector<Node> limbs_B;
+	for(unsigned i = 0; i < k-1; ++i){
+		limbs_A[i] = utils::mkExtract(left, end_index, start_index);
+		limbs_B[i] = utils::mkExtract(right, end_index, start_index);
+		start_index += limb_size;
+		end_index += limb_size;
+	}
+	    //Node last_left_limb = utils::mkExtract(left, (n-1), start_index);
+	    //Node last_right_limb = utils::mkExtract(right, (n-1), start_index);
+	limbs_A[k-1] = utils::mkExtract(left, (n-1), start_index);
+	limbs_B[k-1] = utils::mkExtract(right, (n-1), start_index);
 			
-			vector<Node> limbs_A;
-	    		vector<Node> limbs_B;
-			for(unsigned i = 0; i < k-1; ++i){
-				limbs_A[i] = utils::mkExtract(left, end_index, start_index);
-				limbs_B[i] = utils::mkExtract(right, end_index, start_index);
-				start_index += limb_size;
-				end_index += limb_size;
-			}
-	    		//Node last_left_limb = utils::mkExtract(left, (n-1), start_index);
-	    		//Node last_right_limb = utils::mkExtract(right, (n-1), start_index);
-			limbs_A[k-1] = utils::mkExtract(left, (n-1), start_index);
-			limbs_B[k-1] = utils::mkExtract(right, (n-1), start_index);
-			
-	    Trace("KevinsTrace") << "Left LSBs: " << limbs_A[0] << "\n";
-			Trace("KevinsTrace") << "Left Mid: " << limbs_A[1] << "\n";
-			Trace("KevinsTrace") << "Left MSBs: " << limbs_A[2] << "\n";
+	Trace("KevinsTrace") << "Left LSBs: " << limbs_A[0] << "\n";
+	Trace("KevinsTrace") << "Left Mid: " << limbs_A[1] << "\n";
+	Trace("KevinsTrace") << "Left MSBs: " << limbs_A[2] << "\n";
        
 	    
-	    Node numberTen = utils::mkConst(4, 10);
-	    Trace("KevinsTrace") << "numberTen: " << numberTen << "\n";
+	Node numberTen = utils::mkConst(4, 10);
+	Trace("KevinsTrace") << "numberTen: " << numberTen << "\n";
+	    
 	    //Inputting points. Zero and infinity are always chosen by default.
 	    Trace("KevinsTrace") << "Please input " << ((2*k) - 3) << "points.\n";
-	    
-	    
+	    short point;
+	    vector<Node> Points;
+	    //Populate the array of points.
+	    for(unsigned i = ((2*k) - 3); i > 0; --i){
+		    Trace("KevinsTrace") << "Input a point...\n";
+		    cin >> point;
+		    Points.push_back(utils::mkConst(2*n, point));
+	    }
+	    //Evaluate at each point. Put the results in a vector<Node>.
+ 	    vector<Node> EvalProducts;
+	    Node A_low = utils::mkConcat(utils::mkZero(coefficientSize - limb_size), limbs_A[0]);  
+            Node B_low = utils::mkConcat(utils::mkZero(coefficientSize - limb_size), limbs_B[0]);
+	    for(unsigned i = 0; i <= ((2*k) - 4); ++i){
+		    Node temp_pt = points[i];
+		    Node temp_res_A = nm->mkNode(kind::BITVECTOR_MULT, temp_pt, limbs_A[1]);
+		    Node temp_res_B = nm->mkNode(kind::BITVECTOR_MULT, temp_pt, limbs_B[1]);
+		    Node acc_A = nm->mkNode(kind::BITVECTOR_PLUS, A_low, temp_res_A);
+		    Node acc_B = nm->mkNode(kind::BITVECTOR_PLUS, B_low, temp_res_B);
+		    for(unsigned j = 2; j <= (k-1); ++j){
+			    temp_pt = nm->mkNode(kind::BITVECTOR_MULT, temp_pt, temp_pt);
+			    temp_res_A = nm->mkNode(kind::BITVECTOR_MULT, temp_pt, limbs_A[j]);
+			    temp_res_B = nm->mkNode(kind::BITVECTOR_MULT, temp_pt, limbs_B[j]);
+			    acc_A = nm->mkNode(kind::BITVECTOR_PLUS, acc_A, temp_res_A);
+			    acc_B = nm->mkNode(kind::BITVECTOR_PLUS, acc_B, temp_res_B);
+		    }
+		    EvalProducts.push_back(nm->mkNode(kind::BITVECTOR_MULT, acc_A, acc_B));
+	    }
 	    
 	//k = 3 so split each input into it's three parts
 	
