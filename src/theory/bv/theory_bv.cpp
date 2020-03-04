@@ -868,29 +868,29 @@ void TheoryBV::presolve() {
       // This is where you will need to improve things
       Assert(utils::getSize(*i) == n);
       Assert((*i).getNumChildren() == 2);  // Multiplication of two numbers!
-      Trace("KevinsTrace") << "Passing line 868.\n";
+      Trace("KevinsTrace") << "Passing line 871.\n";
       Node result = *i;        // The result we are trying to compute
       Node left = result[0];   // Left hand side of the input
       Node right = result[1];  // Right hand side of the input
 		
 	    
 	    
-	Trace("KevinsTrace") << "Passing line 875.\n";
+	Trace("KevinsTrace") << "Passing line 878.\n";
 	//Split the number into its limbs.
 	vector<Node> limbs_A;
 	vector<Node> limbs_B;
-	Trace("KevinsTrace") << "Passing line 879.\n";
+	Trace("KevinsTrace") << "Passing line 882.\n";
 	for(unsigned i = 0; i < k-1; ++i){
 		limbs_A.push_back(utils::mkExtract(left, end_index, start_index));
 		limbs_B.push_back(utils::mkExtract(right, end_index, start_index));
 		start_index += limb_size;
 		end_index += limb_size;
 	}
-	Trace("KevinsTrace") << "Passing line 886.\n";
+	Trace("KevinsTrace") << "Passing line 889.\n";
 	    //Node last_left_limb = utils::mkExtract(left, (n-1), start_index);
 	    //Node last_right_limb = utils::mkExtract(right, (n-1), start_index);
-	limbs_A[k-1] = utils::mkExtract(left, (n-1), start_index);
-	limbs_B[k-1] = utils::mkExtract(right, (n-1), start_index);
+	limbs_A.push_back(utils::mkExtract(left, (n-1), start_index));
+	limbs_B.push_back(utils::mkExtract(right, (n-1), start_index));
 			
 	Trace("KevinsTrace") << "Left LSBs: " << limbs_A[0] << "\n";
 	Trace("KevinsTrace") << "Left Mid: " << limbs_A[1] << "\n";
