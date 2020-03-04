@@ -933,20 +933,23 @@ void TheoryBV::presolve() {
 	    //Eval at all other points.
 	    Node A_low = limbs_A[0];  
             Node B_low = limbs_B[0];
+	    Trace("KevinsTrace") << "Passing line 936\n";
 	    for(unsigned i = 0; i <= ((2*k) - 4); ++i){
+		    Trace("KevinsTrace") << "Evaluating... (Line: 938)\n";
 		    Node temp_pt = points[i];
 		    Node temp_res_A = nm->mkNode(kind::BITVECTOR_MULT, temp_pt, limbs_A[1]);
 		    Node temp_res_B = nm->mkNode(kind::BITVECTOR_MULT, temp_pt, limbs_B[1]);
 		    Node acc_A = nm->mkNode(kind::BITVECTOR_PLUS, A_low, temp_res_A);
 		    Node acc_B = nm->mkNode(kind::BITVECTOR_PLUS, B_low, temp_res_B);
 		    for(unsigned j = 2; j <= (k-1); ++j){
+			    Trace("KevinsTrace") << "Entered inner loop... (Line: 945)\n";
 			    temp_pt = nm->mkNode(kind::BITVECTOR_MULT, temp_pt, temp_pt);
 			    temp_res_A = nm->mkNode(kind::BITVECTOR_MULT, temp_pt, limbs_A[j]);
 			    temp_res_B = nm->mkNode(kind::BITVECTOR_MULT, temp_pt, limbs_B[j]);
 			    acc_A = nm->mkNode(kind::BITVECTOR_PLUS, acc_A, temp_res_A);
 			    acc_B = nm->mkNode(kind::BITVECTOR_PLUS, acc_B, temp_res_B);
 		    }
-		    Trace("KevinsTrace") << "Passing line 949\n";
+		    Trace("KevinsTrace") << "Passing line 952\n";
 		    EvalProducts.push_back(nm->mkNode(kind::BITVECTOR_MULT, acc_A, acc_B));
 	    }
 	    
