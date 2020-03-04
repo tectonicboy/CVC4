@@ -852,13 +852,16 @@ void TheoryBV::presolve() {
 
       //Initialize crucial Toom-Cook values.
       unsigned n = 0, k = 0, limb_size = 0, start_index = 0, end_index = 0;
-      unsigned coefficientSize = (2*limb_size) + ceil(log2(k)); // This will need to be set correctly and may not be the same for each
+     
       Trace("KevinsTrace") << "Please input n and k.\n";
       cin >> n >> k;
 			double LS = n / k;
 			limb_size = ceil(LS);
 	    end_index = limb_size - 1;
+      unsigned coefficientSize = (2*limb_size) + ceil(log2(k)); // This will need to be set correctly and may not be the same for each
       Trace("KevinsTrace") << "limb size = " << limb_size << "\n";
+      Trace("KevinsTrace") << "coefficient size = " << coefficientSize << "\n";
+	    
 	    
       
 
@@ -873,7 +876,7 @@ void TheoryBV::presolve() {
 	    
 	    
 	Trace("KevinsTrace") << "Passing line 875.\n";
-	//Split the number into its libs.
+	//Split the number into its limbs.
 	vector<Node> limbs_A;
 	vector<Node> limbs_B;
 	Trace("KevinsTrace") << "Passing line 879.\n";
@@ -905,6 +908,7 @@ void TheoryBV::presolve() {
 		    points.push_back(utils::mkConst(2*n, point));
 	    }
 	    //Evaluate at each point. Put the results in a vector<Node>.
+
  	    vector<Node> EvalProducts;
 	    Node A_low = utils::mkConcat(utils::mkZero(coefficientSize - limb_size), limbs_A[0]);  
             Node B_low = utils::mkConcat(utils::mkZero(coefficientSize - limb_size), limbs_B[0]);
