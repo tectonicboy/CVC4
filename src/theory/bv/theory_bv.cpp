@@ -929,7 +929,7 @@ void TheoryBV::presolve() {
 	    Node eval_inf_A = *(limbs_A.end() - 1);
 	    Node eval_inf_B = *(limbs_B.end() - 1);
 	    EvalProducts.push_back(nm->mkNode(kind::BITVECTOR_MULT, eval_inf_A, eval_inf_B));
-
+	    Trace("KevinsTrace") << "Passing line 932\n";
 	    //Eval at all other points.
 	    Node A_low = limbs_A[0];  
             Node B_low = limbs_B[0];
@@ -946,6 +946,7 @@ void TheoryBV::presolve() {
 			    acc_A = nm->mkNode(kind::BITVECTOR_PLUS, acc_A, temp_res_A);
 			    acc_B = nm->mkNode(kind::BITVECTOR_PLUS, acc_B, temp_res_B);
 		    }
+		    Trace("KevinsTrace") << "Passing line 949\n";
 		    EvalProducts.push_back(nm->mkNode(kind::BITVECTOR_MULT, acc_A, acc_B));
 	    }
 	    
