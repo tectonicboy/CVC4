@@ -944,12 +944,16 @@ void TheoryBV::presolve() {
 		    for(unsigned j = 2; j <= (k-1); ++j){
 			    Trace("KevinsTrace") << "Entered inner loop... (Line: 945)\n";
 			    temp_pt = nm->mkNode(kind::BITVECTOR_MULT, temp_pt, temp_pt);
+			    			    Trace("KevinsTrace") << "Entered inner loop... (Line: 947)\n";
 			    temp_res_A = nm->mkNode(kind::BITVECTOR_MULT, temp_pt, limbs_A[j]);
+			    			    Trace("KevinsTrace") << "Entered inner loop... (Line: 949)\n";
 			    temp_res_B = nm->mkNode(kind::BITVECTOR_MULT, temp_pt, limbs_B[j]);
+			    			    Trace("KevinsTrace") << "Entered inner loop... (Line: 951)\n";
 			    acc_A = nm->mkNode(kind::BITVECTOR_PLUS, acc_A, temp_res_A);
+			    			    Trace("KevinsTrace") << "Entered inner loop... (Line: 953)\n";
 			    acc_B = nm->mkNode(kind::BITVECTOR_PLUS, acc_B, temp_res_B);
+			    			    Trace("KevinsTrace") << "Entered inner loop... (Line: 955)\n";
 		    }
-		    Trace("KevinsTrace") << "Passing line 952\n";
 		    EvalProducts.push_back(nm->mkNode(kind::BITVECTOR_MULT, acc_A, acc_B));
 	    }
 	    
