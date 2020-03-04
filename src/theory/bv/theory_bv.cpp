@@ -905,7 +905,7 @@ void TheoryBV::presolve() {
 	    for(unsigned i = ((2*k) - 3); i > 0; --i){
 		    Trace("KevinsTrace") << "Input a point...\n";
 		    cin >> point;
-		    points.push_back(utils::mkConst(2*n, point));
+		    points.push_back(utils::mkConst(coefficientSize, point));
 	    }
 	    //Evaluate at each point. Put the results in a vector<Node>.
 
