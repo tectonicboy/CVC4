@@ -865,11 +865,14 @@ void TheoryBV::presolve() {
       // This is where you will need to improve things
       Assert(utils::getSize(*i) == n);
       Assert((*i).getNumChildren() == 2);  // Multiplication of two numbers!
-
+      Trace("KevinsTrace") << "Passing line 868.\n";
       Node result = *i;        // The result we are trying to compute
       Node left = result[0];   // Left hand side of the input
       Node right = result[1];  // Right hand side of the input
-			
+		
+	    
+	    
+	Trace("KevinsTrace") << "Passing line 875.\n";
 	//Split the number into its libs.
 	vector<Node> limbs_A;
 	vector<Node> limbs_B;
@@ -888,9 +891,6 @@ void TheoryBV::presolve() {
 	Trace("KevinsTrace") << "Left Mid: " << limbs_A[1] << "\n";
 	Trace("KevinsTrace") << "Left MSBs: " << limbs_A[2] << "\n";
        
-	    
-	Node numberTen = utils::mkConst(4, 10);
-	Trace("KevinsTrace") << "numberTen: " << numberTen << "\n";
 	    
 	    //Inputting points. Zero and infinity are always chosen by default.
 	    Trace("KevinsTrace") << "Please input " << ((2*k) - 3) << "points.\n";
