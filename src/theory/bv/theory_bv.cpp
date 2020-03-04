@@ -985,20 +985,20 @@ void TheoryBV::presolve() {
       inputs[0] = nm->mkBitVectorType(n);  // Note the use of n
       inputs[1] = nm->mkBitVectorType(n);
 
-    
-
-			
-		/*	vector<Node> coefficients;
-			for(unsigned i = 1; i < ((2*k) - 1); ++i){
-				coefficients.push_back(nm->mkNode(kind::APPLY_UF,
-			  nm->mkSkolem("TC_multiply_a",
+      vector<Node> coefficients;
+      string coef_name = "TC_multiply_";
+      for(int i = 0; i < (2*k) - 1; ++i){
+	     string name = coef_name;
+	     coef_name.append(to_string(i));
+	     coefficients.push_back(nm->mkNode(kind::APPLY_UF,
+			  nm->mkSkolem(coef_name,
 				       nm->mkFunctionType(inputs, nm->mkBitVectorType(coefficientSize)),
-				       "TC_multiply_a",
+				       coef_name,
 				       NodeManager::SKOLEM_EXACT_NAME),
 			  left,
-			  right));
-			}
-			*/
+			  right);
+      }
+    
       Node a = nm->mkNode(kind::APPLY_UF,
 			  nm->mkSkolem("TC_multiply_a",
 				       nm->mkFunctionType(inputs, nm->mkBitVectorType(coefficientSize)),
