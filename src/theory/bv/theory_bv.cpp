@@ -896,7 +896,7 @@ void TheoryBV::presolve() {
 	limbs_A.push_back(utils::mkConcat(utils::mkZero
 					  (coefficientSize - last_limb_size), 
 					  (utils::mkExtract(left, (n-1), start_index))));
-	limbs_A.push_back(utils::mkConcat(utils::mkZero
+	limbs_B.push_back(utils::mkConcat(utils::mkZero
 					  (coefficientSize - last_limb_size), 
 					  (utils::mkExtract(right, (n-1), start_index))));
 	
