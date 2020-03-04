@@ -881,8 +881,13 @@ void TheoryBV::presolve() {
 	vector<Node> limbs_B;
 	Trace("KevinsTrace") << "Passing line 882.\n";
 	for(unsigned i = 0; i < k-1; ++i){
-		limbs_A.push_back(utils::mkConcat(utils::mkZero(coefficientSize - limb_size), (utils::mkExtract(left, end_index, start_index)));
-		limbs_B.push_back(utils::mkConcat(utils::mkZero(coefficientSize - limb_size), (utils::mkExtract(right, end_index, start_index)));
+		limbs_A.push_back(utils::mkConcat
+				  (utils::mkZero(coefficientSize - limb_size),
+				   (utils::mkExtract(left, end_index, start_index))));
+				  
+		limbs_B.push_back(utils::mkConcat
+				  (utils::mkZero(coefficientSize - limb_size),
+				   (utils::mkExtract(right, end_index, start_index))));
 		start_index += limb_size;
 		end_index += limb_size;
 	}
@@ -890,8 +895,12 @@ void TheoryBV::presolve() {
 	    //Node last_left_limb = utils::mkExtract(left, (n-1), start_index);
 	    //Node last_right_limb = utils::mkExtract(right, (n-1), start_index);
 	unsigned last_limb_size = (k * (ceil(n/k))) - n;
-	limbs_A.push_back(utils::mkConcat(utils::mkZero(coefficientSize - last_limb_size), (utils::mkExtract(left, (n-1), start_index)));
-	limbs_A.push_back(utils::mkConcat(utils::mkZero(coefficientSize - last_limb_size), (utils::mkExtract(right, (n-1), start_index)));
+	limbs_A.push_back(utils::mkConcat(utils::mkZero
+					  (coefficientSize - last_limb_size), 
+					  (utils::mkExtract(left, (n-1), start_index))));
+	limbs_A.push_back(utils::mkConcat(utils::mkZero
+					  (coefficientSize - last_limb_size), 
+					  (utils::mkExtract(right, (n-1), start_index))));
 	
 	//Extend all limbs to coefficient size
 	
