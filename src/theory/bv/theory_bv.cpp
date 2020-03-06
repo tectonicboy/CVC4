@@ -914,7 +914,8 @@ void TheoryBV::presolve() {
 		    Trace("KevinsTrace") << "Input a point...\n";
 		    l1:
 		    cin >> point;
-		    if((ceil(point*log2(10))) > point_size){
+		    string sp = to_string(point);
+		    if((ceil((sp.size())*log2(10))) > point_size){
 			    Trace("KevinsTrace") << "That point is too large, please enter another one...\n";
 			    goto l1;
 		    }
