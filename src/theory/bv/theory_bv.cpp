@@ -912,7 +912,7 @@ void TheoryBV::presolve() {
 	    //Populate the array of points.
 	    for(unsigned i = ((2*k) - 3); i > 0; --i){
 		    Trace("KevinsTrace") << "Input a point...\n";
-		    label l1:
+		    l1:
 		    cin >> point;
 		    if((ceil(point*log2(10))) > point_size){
 			    Trace("KevinsTrace") << "That point is too large, please enter another one...\n";
