@@ -852,8 +852,9 @@ void TheoryBV::presolve() {
 
       //Initialize crucial Toom-Cook values.
       unsigned n = 0, k = 0, limb_size = 0, start_index = 0, end_index = 0, point_size;
-      Trace("KevinsTrace") << "How many bits to reserve for points?\n";
-      cin >> point_size;
+      //Trace("KevinsTrace") << "How many bits to reserve for points?\n";
+      //cin >> point_size;
+      point_size = 4;
       Trace("KevinsTrace") << "Please input n and k.\n";
       cin >> n >> k;
 			double LS = n / k;
@@ -912,18 +913,18 @@ void TheoryBV::presolve() {
 	    //Populate the array of points.
 	    for(unsigned i = ((2*k) - 3); i > 0; --i){
 		    Trace("KevinsTrace") << "Input a point...\n";
-		    l1:
+		  //  l1:
 		    cin >> point;
-		    string sp = to_string(point);
-		    unsigned current_point_bitsize = (ceil((sp.size())*log2(10)));
-		    Trace("KevinsTrace") << "Current point bitsize: " << current_point_bitsize << "\n";
-		    if(current_point_bitsize > point_size){
-			    Trace("KevinsTrace") << "That point is too large, please enter another one...\n";
-			    goto l1;
-		    }
-		    else{
+		 //   string sp = to_string(point);
+		  //  unsigned current_point_bitsize = (ceil((sp.size())*log2(10)));
+		 //   Trace("KevinsTrace") << "Current point bitsize: " << current_point_bitsize << "\n";
+		  //  if(current_point_bitsize > point_size){
+		//	    Trace("KevinsTrace") << "That point is too large, please enter another one...\n";
+		//	    goto l1;
+		 //   }
+		   // else{
 		    	    points.push_back(utils::mkConst(eval_prod_size, point));
-		    }
+		 //   }
 	    }
 	    //Evaluate at each point. Put the results in a vector<Node>.
 	    vector<Node> EvalProducts;
