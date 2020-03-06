@@ -917,7 +917,7 @@ void TheoryBV::presolve() {
 		    string sp = to_string(point);
 		    unsigned current_point_bitsize = (ceil((sp.size())*log2(10)));
 		    Trace("KevinsTrace") << "Current point bitsize: " << current_point_bitsize << "\n";
-		    if((ceil((sp.size())*log2(10))) > point_size){
+		    if(current_point_bitsize > point_size){
 			    Trace("KevinsTrace") << "That point is too large, please enter another one...\n";
 			    goto l1;
 		    }
