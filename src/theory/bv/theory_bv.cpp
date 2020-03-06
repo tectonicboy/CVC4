@@ -854,7 +854,7 @@ void TheoryBV::presolve() {
       unsigned n = 0, k = 0, limb_size = 0, start_index = 0, end_index = 0, point_size;
       //Trace("KevinsTrace") << "How many bits to reserve for points?\n";
       //cin >> point_size;
-      point_size = 4;
+      point_size = 3;
       Trace("KevinsTrace") << "Please input n and k.\n";
       cin >> n >> k;
 			double LS = n / k;
