@@ -851,16 +851,17 @@ void TheoryBV::presolve() {
       NodeManager *nm = NodeManager::currentNM(); // This is used to make nodes!
 
       //Initialize crucial Toom-Cook values.
-      unsigned n = 0, k = 0, limb_size = 0, start_index = 0, end_index = 0;
-     
+      unsigned n = 0, k = 0, limb_size = 0, start_index = 0, end_index = 0, point_size;
+      Trace("KevinsTrace") << "How many bits to reserve for points?\n";
+      cin >> point_size;
       Trace("KevinsTrace") << "Please input n and k.\n";
       cin >> n >> k;
 			double LS = n / k;
 			limb_size = ceil(LS);
 	    end_index = limb_size - 1;
-      unsigned coefficientSize = (2*limb_size) + ceil(log2(k)); // This will need to be set correctly and may not be the same for each
+      unsigned eval_prod_size = 2*(((k-1)*point_size) + limb_size + 1); // This will need to be set correctly and may not be the same for each
       Trace("KevinsTrace") << "limb size = " << limb_size << "\n";
-      Trace("KevinsTrace") << "coefficient size = " << coefficientSize << "\n";
+      Trace("KevinsTrace") << "max eval product size = " << eval_prod_size << "\n";
 	    
 	    
       
@@ -868,7 +869,6 @@ void TheoryBV::presolve() {
       // This is where you will need to improve things
       Assert(utils::getSize(*i) == n);
       Assert((*i).getNumChildren() == 2);  // Multiplication of two numbers!
-      Trace("KevinsTrace") << "Passing line 871.\n";
       Node result = *i;        // The result we are trying to compute
       Node left = result[0];   // Left hand side of the input
       Node right = result[1];  // Right hand side of the input
@@ -880,27 +880,25 @@ void TheoryBV::presolve() {
 	vector<Node> limbs_B;
 	for(unsigned i = 0; i < k-1; ++i){
 		limbs_A.push_back(utils::mkConcat
-				  (utils::mkZero(coefficientSize - limb_size),
+				  (utils::mkZero(eval_prod_size - limb_size),
 				   (utils::mkExtract(left, end_index, start_index))));
 				  
 		limbs_B.push_back(utils::mkConcat
-				  (utils::mkZero(coefficientSize - limb_size),
+				  (utils::mkZero(eval_prod_size - limb_size),
 				   (utils::mkExtract(right, end_index, start_index))));
 		start_index += limb_size;
 		end_index += limb_size;
 	}
-	    //Node last_left_limb = utils::mkExtract(left, (n-1), start_index);
-	    //Node last_right_limb = utils::mkExtract(right, (n-1), start_index);
+	    
 	unsigned last_limb_size = (k * (ceil(n/k))) - n;
 	if(last_limb_size == 0) { last_limb_size = limb_size; }
 	limbs_A.push_back(utils::mkConcat(utils::mkZero
-					  (coefficientSize - last_limb_size), 
+					  (eval_prod_size - last_limb_size), 
 					  (utils::mkExtract(left, (n-1), start_index))));
 	limbs_B.push_back(utils::mkConcat(utils::mkZero
-					  (coefficientSize - last_limb_size), 
+					  (eval_prod_size - last_limb_size), 
 					  (utils::mkExtract(right, (n-1), start_index))));
 	
-	//Extend all limbs to coefficient size
 	
 	Trace("KevinsTrace") << "Left LSBs: " << limbs_A[0] << "\n";
 	Trace("KevinsTrace") << "Left Mid: " << limbs_A[1] << "\n";
@@ -914,8 +912,15 @@ void TheoryBV::presolve() {
 	    //Populate the array of points.
 	    for(unsigned i = ((2*k) - 3); i > 0; --i){
 		    Trace("KevinsTrace") << "Input a point...\n";
+		    label l1:
 		    cin >> point;
-		    points.push_back(utils::mkConst(coefficientSize, point));
+		    if((ceil(point*log2(10))) > point_size){
+			    Trace("KevinsTrace") << "That point is too large, please enter another one...\n";
+			    goto l1;
+		    }
+		    else{
+		    	    points.push_back(utils::mkConst(eval_prod_size, point));
+		    }
 	    }
 	    //Evaluate at each point. Put the results in a vector<Node>.
 	    vector<Node> EvalProducts;
@@ -929,30 +934,21 @@ void TheoryBV::presolve() {
 	    Node eval_inf_A = *(limbs_A.end() - 1);
 	    Node eval_inf_B = *(limbs_B.end() - 1);
 	    EvalProducts.push_back(nm->mkNode(kind::BITVECTOR_MULT, eval_inf_A, eval_inf_B));
-	    Trace("KevinsTrace") << "Passing line 932\n";
 	    //Eval at all other points.
 	    Node A_low = limbs_A[0];  
             Node B_low = limbs_B[0];
-	    Trace("KevinsTrace") << "Passing line 936\n";
 	    for(unsigned i = 0; i <= ((2*k) - 4); ++i){
-		    Trace("KevinsTrace") << "Evaluating... (Line: 938)\n";
 		    Node temp_pt = points[i];
 		    Node temp_res_A = nm->mkNode(kind::BITVECTOR_MULT, temp_pt, limbs_A[1]);
 		    Node temp_res_B = nm->mkNode(kind::BITVECTOR_MULT, temp_pt, limbs_B[1]);
 		    Node acc_A = nm->mkNode(kind::BITVECTOR_PLUS, A_low, temp_res_A);
 		    Node acc_B = nm->mkNode(kind::BITVECTOR_PLUS, B_low, temp_res_B);
 		    for(unsigned j = 2; j <= (k-1); ++j){
-			    Trace("KevinsTrace") << "Entered inner loop... (Line: 945)\n";
 			    temp_pt = nm->mkNode(kind::BITVECTOR_MULT, temp_pt, temp_pt);
-			    			    Trace("KevinsTrace") << "Entered inner loop... (Line: 947)\n";
 			    temp_res_A = nm->mkNode(kind::BITVECTOR_MULT, temp_pt, limbs_A[j]);
-			    			    Trace("KevinsTrace") << "Entered inner loop... (Line: 949)\n";
 			    temp_res_B = nm->mkNode(kind::BITVECTOR_MULT, temp_pt, limbs_B[j]);
-			    			    Trace("KevinsTrace") << "Entered inner loop... (Line: 951)\n";
 			    acc_A = nm->mkNode(kind::BITVECTOR_PLUS, acc_A, temp_res_A);
-			    			    Trace("KevinsTrace") << "Entered inner loop... (Line: 953)\n";
 			    acc_B = nm->mkNode(kind::BITVECTOR_PLUS, acc_B, temp_res_B);
-			    			    Trace("KevinsTrace") << "Entered inner loop... (Line: 955)\n";
 		    }
 		    EvalProducts.push_back(nm->mkNode(kind::BITVECTOR_MULT, acc_A, acc_B));
 	    }
@@ -962,7 +958,7 @@ void TheoryBV::presolve() {
 	    
 	    
 	//k = 3 so split each input into it's three parts
-	
+	/*
        Node leftLow = utils::mkExtract(left, 3, 0);
        Node leftMid = utils::mkExtract(left, 7, 4);
        Node leftHigh = utils::mkExtract(left, 11, 8);
@@ -976,7 +972,7 @@ void TheoryBV::presolve() {
       Trace("bitvector::TCMultiplier") << "Right LSBs " << rightLow << "\n";
       Trace("bitvector::TCMultiplier") << "Right Mid " << rightMid << "\n";
       Trace("bitvector::TCMultiplier") << "Right MSBs " << rightHigh << "\n";
-			
+	*/	
 			
       // Create the 5 co-efficients
       // This involves a certain amount of magic / deeper use of the APIs
@@ -986,22 +982,36 @@ void TheoryBV::presolve() {
       inputs[1] = nm->mkBitVectorType(n);
 
       vector<Node> coefficients;
+      vector<Node> TC_lemma_nodes;
       string coef_name = "TC_multiply_";
+     // string lemma_name = "TC_lemma_";
       for(int i = 0; i < (2*k) - 1; ++i){
 	     string name = coef_name;
 	     coef_name.append(to_string(i));
+	    // string l_name = lemma_name;
+	    // lemma_name.append(to_string(i));
 	     coefficients.push_back(nm->mkNode(kind::APPLY_UF,
 			  nm->mkSkolem(coef_name,
-				       nm->mkFunctionType(inputs, nm->mkBitVectorType(coefficientSize)),
+				       nm->mkFunctionType(inputs, nm->mkBitVectorType(eval_prod_size)),
 				       coef_name,
 				       NodeManager::SKOLEM_EXACT_NAME),
 			  left,
 			  right));
+	      Trace("KevinsTrace") << "x^" << i << " coefficient: " << *(coefficients.end() - 1) << "\n";
+	      //Change that 
+	      TC_lemma_nodes.push_back(nm->mkNode(kind::EQUAL, EvalProducts[i], *(coefficients.end() - 1)));
+	     // Node eval0lemma = nm->mkNode(kind::EQUAL, eval0product, e);
+     	     //Trace("bitvector::TCMultiplier") << "Adding lemma " << eval0lemma << "\n";
+             // lemma(eval0lemma);
       }
-    
-      Node a = nm->mkNode(kind::APPLY_UF,
+    //Rewrite the lemmas and introduce them.
+     for(int i = 0; i < (2*k) - 1; ++i){
+	     Rewriter::rewrite(TC_lemma_nodes[i]);
+	     lemma(TC_lemma_nodes[i]);
+     }
+     /* Node a = nm->mkNode(kind::APPLY_UF,
 			  nm->mkSkolem("TC_multiply_a",
-				       nm->mkFunctionType(inputs, nm->mkBitVectorType(coefficientSize)),
+				       nm->mkFunctionType(inputs, nm->mkBitVectorType(eval_prod_size)),
 				       "TC_multiply_a",
 				       NodeManager::SKOLEM_EXACT_NAME),
 			  left,
@@ -1010,7 +1020,7 @@ void TheoryBV::presolve() {
 
        Node b = nm->mkNode(kind::APPLY_UF,
 			  nm->mkSkolem("TC_multiply_b",
-				       nm->mkFunctionType(inputs, nm->mkBitVectorType(coefficientSize)),
+				       nm->mkFunctionType(inputs, nm->mkBitVectorType(eval_prod_size)),
 				       "TC_multiply_b",
 				       NodeManager::SKOLEM_EXACT_NAME),
 			  left,
@@ -1019,7 +1029,7 @@ void TheoryBV::presolve() {
 
       Node c = nm->mkNode(kind::APPLY_UF,
 			  nm->mkSkolem("TC_multiply_c",
-				       nm->mkFunctionType(inputs, nm->mkBitVectorType(coefficientSize)),
+				       nm->mkFunctionType(inputs, nm->mkBitVectorType(eval_prod_size)),
 				       "TC_multiply_c",
 				       NodeManager::SKOLEM_EXACT_NAME),
 			  left,
@@ -1028,7 +1038,7 @@ void TheoryBV::presolve() {
 
       Node d = nm->mkNode(kind::APPLY_UF,
 			  nm->mkSkolem("TC_multiply_d",
-				       nm->mkFunctionType(inputs, nm->mkBitVectorType(coefficientSize)),
+				       nm->mkFunctionType(inputs, nm->mkBitVectorType(eval_prod_size)),
 				       "TC_multiply_d",
 				       NodeManager::SKOLEM_EXACT_NAME),
 			  left,
@@ -1037,19 +1047,21 @@ void TheoryBV::presolve() {
 
       Node e = nm->mkNode(kind::APPLY_UF,
 			  nm->mkSkolem("TC_multiply_e",
-				       nm->mkFunctionType(inputs, nm->mkBitVectorType(coefficientSize)),
+				       nm->mkFunctionType(inputs, nm->mkBitVectorType(eval_prod_size)),
 				       "TC_multiply_e",
 				       NodeManager::SKOLEM_EXACT_NAME),
 			  left,
 			  right);
       Trace("bitvector::TCMultiplier") << "x^0 coefficient " << e << "\n";
 
-
+	*/
+	    
+	    
       // Now build the constraints that correspond to the evaluation at each point
-
+	/*
       // Eval at 0
-      Node eval0left = utils::mkConcat(utils::mkZero(coefficientSize - limb_size),leftLow);    // Extend to 8 bit
-      Node eval0right = utils::mkConcat(utils::mkZero(coefficientSize - limb_size),rightLow);  // Extend to 8 bit
+      Node eval0left = utils::mkConcat(utils::mkZero(eval_prod_size - limb_size),leftLow);    // Extend to 8 bit
+      Node eval0right = utils::mkConcat(utils::mkZero(eval_prod_size - limb_size),rightLow);  // Extend to 8 bit
 
       Node eval0product = nm->mkNode(kind::BITVECTOR_MULT, eval0left, eval0right);
 
@@ -1058,14 +1070,14 @@ void TheoryBV::presolve() {
       Trace("bitvector::TCMultiplier") << "Adding lemma " << eval0lemma << "\n";
       lemma(eval0lemma);
 
-      // Eval in general
-      
+      */
 
 
       // Finally link the coefficients and the result
       // Extend to the full 24 bits, then shift each one into place, finally add
-      unsigned padSize = 2*n - coefficientSize;
-      Node fullProduct =
+      unsigned padSize = 2*n - eval_prod_size;
+      if(padSize < 0) {padSize = 0;} 
+     /* Node fullProduct =
 	nm->mkNode(kind::BITVECTOR_PLUS,
 		   nm->mkNode(kind::BITVECTOR_SHL, utils::mkConcat(utils::mkZero(padSize),a), utils::mkConst(2*n,16)),
 		   nm->mkNode(kind::BITVECTOR_SHL, utils::mkConcat(utils::mkZero(padSize),b), utils::mkConst(2*n,12)),
@@ -1073,12 +1085,27 @@ void TheoryBV::presolve() {
 		   nm->mkNode(kind::BITVECTOR_SHL, utils::mkConcat(utils::mkZero(padSize),d), utils::mkConst(2*n,4)),
 		   nm->mkNode(kind::BITVECTOR_SHL, utils::mkConcat(utils::mkZero(padSize),e), utils::mkConst(2*n,0))
 		   );
-      Trace("bitvector::TCMultiplier") << "Full product expression " << fullProduct << "\n";
-
+     */
+      Node full_product = nm->mkNode(kind::BITVECTOR_PLUS,
+		   nm->mkNode(kind::BITVECTOR_SHL, utils::mkConcat(utils::mkZero(padSize),*(coefficients.end() - 2)), utils::mkConst(2*n,limb_size*1)),
+		   nm->mkNode(kind::BITVECTOR_SHL, utils::mkConcat(utils::mkZero(padSize),*(coefficients.end() - 1)), utils::mkConst(2*n,limb_size*0))
+		   );
+	    unsigned short multiple = 2;
+      for(int i = (2*k) - 4; i >= 0; --i){
+	      full_product = nm->mkNode(kind::BITVECTOR_PLUS,
+		full_product, 
+		nm->mkNode(kind::BITVECTOR_SHL, utils::mkConcat(utils::mkZero(padSize),coefficients[i]), utils::mkConst(2*n,limb_size*multiple))
+	      );
+		++multiple;
+      }
+     // Trace("bitvector::TCMultiplier") << "Full product expression " << fullProduct << "\n";
+      Trace("KevinsTrace") << "Full product (kevin's): " << full_product << "\n";
+	
       Node coefficientsToResultLemma =
-	nm->mkNode(kind::EQUAL, utils::mkExtract(fullProduct, n-1, 0), result);
+	nm->mkNode(kind::EQUAL, utils::mkExtract(full_product, n-1, 0), result);
 
       Trace("bitvector::TCMultiplier") << "Link full product and result " << coefficientsToResultLemma << "\n";
+      Trace("KevinsTrace") << "Link the full product and the result: " << coefficientsToResultLemma << "\n";
     }
   }
 }
