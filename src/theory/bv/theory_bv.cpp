@@ -1090,6 +1090,7 @@ void TheoryBV::presolve() {
 		   nm->mkNode(kind::BITVECTOR_SHL, utils::mkConcat(utils::mkZero(padSize),e), utils::mkConst(2*n,0))
 		   );
      */
+	    Trace("KevinsTrace") << "Passing line 1093...\n";
       Node full_product = nm->mkNode(kind::BITVECTOR_PLUS,
 		   nm->mkNode(kind::BITVECTOR_SHL, utils::mkConcat(utils::mkZero(padSize),*(coefficients.end() - 2)), utils::mkConst(2*n,limb_size*1)),
 		   nm->mkNode(kind::BITVECTOR_SHL, utils::mkConcat(utils::mkZero(padSize),*(coefficients.end() - 1)), utils::mkConst(2*n,limb_size*0))
