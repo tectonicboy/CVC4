@@ -988,13 +988,13 @@ void TheoryBV::presolve() {
      // string lemma_name = "TC_lemma_";
       for(int i = 0; i < (2*k) - 1; ++i){
 	     string name = coef_name;
-	     coef_name.append(to_string(i));
+	     name.append(to_string(i));
 	    // string l_name = lemma_name;
 	    // lemma_name.append(to_string(i));
 	     coefficients.push_back(nm->mkNode(kind::APPLY_UF,
-			  nm->mkSkolem(coef_name,
+			  nm->mkSkolem(name,
 				       nm->mkFunctionType(inputs, nm->mkBitVectorType(eval_prod_size)),
-				       coef_name,
+				       name,
 				       NodeManager::SKOLEM_EXACT_NAME),
 			  left,
 			  right));
