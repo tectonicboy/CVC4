@@ -1096,7 +1096,9 @@ void TheoryBV::presolve() {
 		   nm->mkNode(kind::BITVECTOR_SHL, utils::mkConcat(utils::mkZero(padSize),*(coefficients.end() - 1)), utils::mkConst(2*n,limb_size*0))
 		   );
 	    unsigned short multiple = 2;
+	    Trace("KevinsTrace") << "Passing line 1099...\n";
       for(int i = (2*k) - 4; i >= 0; --i){
+	      Trace("KevinsTrace") << "ENTERING FOR LOOP. Multiple = " << multiple << ". Adding the shifted coefficient to result.\n";
 	      full_product = nm->mkNode(kind::BITVECTOR_PLUS,
 		full_product, 
 		nm->mkNode(kind::BITVECTOR_SHL, utils::mkConcat(utils::mkZero(padSize),coefficients[i]), utils::mkConst(2*n,limb_size*multiple))
@@ -1104,11 +1106,12 @@ void TheoryBV::presolve() {
 		++multiple;
       }
      // Trace("bitvector::TCMultiplier") << "Full product expression " << fullProduct << "\n";
+      	Trace("KevinsTrace") << "Passing line 1109...\n";
       Trace("KevinsTrace") << "Full product (kevin's): " << full_product << "\n";
 	
       Node coefficientsToResultLemma =
 	nm->mkNode(kind::EQUAL, utils::mkExtract(full_product, n-1, 0), result);
-
+	    Trace("KevinsTrace") << "Passing line 1114...\n";
       Trace("bitvector::TCMultiplier") << "Link full product and result " << coefficientsToResultLemma << "\n";
       Trace("KevinsTrace") << "Link the full product and the result: " << coefficientsToResultLemma << "\n";
     }
