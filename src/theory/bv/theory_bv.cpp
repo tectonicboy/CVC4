@@ -1135,7 +1135,10 @@ void TheoryBV::presolve() {
 	nm->mkNode(kind::EQUAL, utils::mkExtract(full_product, n-1, 0), result);
       //Trace("bitvector::TCMultiplier") << "Link full product and result " << coefficientsToResultLemma << "\n";
       Trace("KevinsTrace") << "Link the full product and the result: " << coefficientsToResultLemma << "\n";
-	    	    Trace("KevinsTrace") << "Passing line 1117...\n";
+	
+      points = {}; coefficients = {};
+      TC_lemma_nodes = {};  EvalProducts = {};
+      limbs_A = {}; limbs_B = {};
     }
   }
 }
