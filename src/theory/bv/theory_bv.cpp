@@ -931,20 +931,25 @@ void TheoryBV::presolve() {
 	    }
 	    //Evaluate at each point. Put the results in a vector<Node>.
 	    vector<Node> EvalProducts;
-	    
+	    Trace("KevinsTrace") << "Passing line: " << __LINE__ <<"\n";
 	    //Eval at zero.
 	    Node eval_zero_A = *(limbs_A.begin());
+	    	    Trace("KevinsTrace") << "Passing line: " << __LINE__ <<"\n";
 	    Node eval_zero_B = *(limbs_B.begin());
+	    	    Trace("KevinsTrace") << "Passing line: " << __LINE__ <<"\n";
 	    EvalProducts.push_back(nm->mkNode(kind::BITVECTOR_MULT, eval_zero_A, eval_zero_B));
+	    	    Trace("KevinsTrace") << "Passing line: " << __LINE__ <<"\n";
 	    
 	    //Eval at infinity.
 	    Node eval_inf_A = *(limbs_A.end() - 1);
+	    	    Trace("KevinsTrace") << "Passing line: " << __LINE__ <<"\n";
 	    Node eval_inf_B = *(limbs_B.end() - 1);
 	    EvalProducts.push_back(nm->mkNode(kind::BITVECTOR_MULT, eval_inf_A, eval_inf_B));
 	    //Eval at all other points.
 	    Node A_low = limbs_A[0];  
             Node B_low = limbs_B[0];
 	    bool pair = false;
+	    	    Trace("KevinsTrace") << "Passing line: " << __LINE__ <<"\n";
 	    for(unsigned i = 0; i <= ((2*k) - 4); ++i){
 		    if(i < ((2*k) - 4)){
 			    if(points[i+1] == (nm->mkNode(kind::BITVECTOR_MULT,
@@ -1000,7 +1005,7 @@ void TheoryBV::presolve() {
 			  }
 
 	    }
-	    
+	    	    Trace("KevinsTrace") << "Passing line: " << __LINE__ <<"\n";
 	Trace("KevinsTrace") << "Last eval product: " << *(EvalProducts.end() - 1) << "\n";
 	    
 	    
@@ -1033,6 +1038,7 @@ void TheoryBV::presolve() {
       vector<Node> TC_lemma_nodes;
       string coef_name = "TC_multiply_";
      // string lemma_name = "TC_lemma_";
+	    	    Trace("KevinsTrace") << "Passing line: " << __LINE__ <<"\n";
       for(unsigned i = 0; i < (2*k) - 1; ++i){
 	     string name = coef_name;
 	     name.append(to_string(i));
@@ -1052,11 +1058,13 @@ void TheoryBV::presolve() {
      	     //Trace("bitvector::TCMultiplier") << "Adding lemma " << eval0lemma << "\n";
              // lemma(eval0lemma);
       }
+	    	    Trace("KevinsTrace") << "Passing line: " << __LINE__ <<"\n";
     //Rewrite the lemmas and introduce them.
      for(unsigned i = 0; i < (2*k) - 1; ++i){
 	     Rewriter::rewrite(TC_lemma_nodes[i]);
 	     lemma(TC_lemma_nodes[i]);
      }
+	    	    Trace("KevinsTrace") << "Passing line: " << __LINE__ <<"\n";
      /* Node a = nm->mkNode(kind::APPLY_UF,
 			  nm->mkSkolem("TC_multiply_a",
 				       nm->mkFunctionType(inputs, nm->mkBitVectorType(eval_prod_size)),
@@ -1124,6 +1132,7 @@ void TheoryBV::presolve() {
       // Finally link the coefficients and the result
       // Extend to the full 24 bits, then shift each one into place, finally add
       int padSize = 2*n - eval_prod_size;
+	    	    Trace("KevinsTrace") << "Passing line: " << __LINE__ <<"\n";
       if(padSize < 0) {padSize = 1;} 
      /* Node fullProduct =
 	nm->mkNode(kind::BITVECTOR_PLUS,
@@ -1134,11 +1143,12 @@ void TheoryBV::presolve() {
 		   nm->mkNode(kind::BITVECTOR_SHL, utils::mkConcat(utils::mkZero(padSize),e), utils::mkConst(2*n,0))
 		   );
      */
-	    Trace("KevinsTrace") << "Passing line 1137...\n";
+	    Trace("KevinsTrace") << "Passing line: " << __LINE__ <<"\n";
       Node full_product = nm->mkNode(kind::BITVECTOR_PLUS,
 		   nm->mkNode(kind::BITVECTOR_SHL, utils::mkConcat(utils::mkZero(padSize),*(coefficients.end() - 2)), utils::mkConst((padSize + eval_prod_size),limb_size*1)),
 		   nm->mkNode(kind::BITVECTOR_SHL, utils::mkConcat(utils::mkZero(padSize),*(coefficients.end() - 1)), utils::mkConst((padSize + eval_prod_size),limb_size*0))
 		   );
+	    	    Trace("KevinsTrace") << "Passing line: " << __LINE__ <<"\n";
 	    unsigned short multiple = 2;
       for(int i = (2*k) - 4; i >= 0; --i){
 	      Trace("KevinsTrace") << "ENTERING FOR LOOP. Multiple = " << multiple << ". Adding the shifted coefficient to result.\n";
@@ -1148,6 +1158,7 @@ void TheoryBV::presolve() {
 	      );
 		++multiple;
       }
+	    	    Trace("KevinsTrace") << "Passing line: " << __LINE__ <<"\n";
      // Trace("bitvector::TCMultiplier") << "Full product expression " << fullProduct << "\n";
       Trace("KevinsTrace") << "Full product (kevin's): " << full_product << "\n";
 	
@@ -1155,7 +1166,7 @@ void TheoryBV::presolve() {
 	nm->mkNode(kind::EQUAL, utils::mkExtract(full_product, n-1, 0), result);
       //Trace("bitvector::TCMultiplier") << "Link full product and result " << coefficientsToResultLemma << "\n";
       Trace("KevinsTrace") << "Link the full product and the result: " << coefficientsToResultLemma << "\n";
-	
+		    Trace("KevinsTrace") << "Passing line: " << __LINE__ <<"\n";
       points = {}; coefficients = {};
       TC_lemma_nodes = {};  EvalProducts = {};
       limbs_A = {}; limbs_B = {};
