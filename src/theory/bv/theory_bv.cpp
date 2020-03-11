@@ -943,18 +943,41 @@ void TheoryBV::presolve() {
             Node B_low = limbs_B[0];
 	    for(unsigned i = 0; i <= ((2*k) - 4); ++i){
 		    Node temp_pt = points[i];
-		    Node temp_res_A = nm->mkNode(kind::BITVECTOR_MULT, temp_pt, limbs_A[1]);
-		    Node temp_res_B = nm->mkNode(kind::BITVECTOR_MULT, temp_pt, limbs_B[1]);
-		    Node acc_A = nm->mkNode(kind::BITVECTOR_PLUS, A_low, temp_res_A);
-		    Node acc_B = nm->mkNode(kind::BITVECTOR_PLUS, B_low, temp_res_B);
-		    for(unsigned j = 2; j <= (k-1); ++j){
-			    temp_pt = nm->mkNode(kind::BITVECTOR_MULT, temp_pt, temp_pt);
-			    temp_res_A = nm->mkNode(kind::BITVECTOR_MULT, temp_pt, limbs_A[j]);
-			    temp_res_B = nm->mkNode(kind::BITVECTOR_MULT, temp_pt, limbs_B[j]);
-			    acc_A = nm->mkNode(kind::BITVECTOR_PLUS, acc_A, temp_res_A);
-			    acc_B = nm->mkNode(kind::BITVECTOR_PLUS, acc_B, temp_res_B);
+		    Node temp_res_A_even = nm->mkNode(kind::BITVECTOR_MULT, temp_pt, limbs_A[1]);
+		    Node temp_res_A_odd = A_low;
+		    Node temp_res_B_even = nm->mkNode(kind::BITVECTOR_MULT, temp_pt, limbs_B[1]);
+		    Node temp_res_B_odd = B_low;
+		    Node acc_A_even = temp_res_A_even;
+		    Node acc_A_odd = temp_res_A_odd;
+		    Node acc_B_even = temp_res_B_even;
+		    Node acc_B_odd = temp_res_B_odd;
+		    for(unsigned j = 2; j <= (k-1); j+=2){
+			    if(j < (k-1)){
+			   	 temp_pt = nm->mkNode(kind::BITVECTOR_MULT, temp_pt, temp_pt);
+			   	 temp_res_A_odd = nm->mkNode(kind::BITVECTOR_MULT, temp_pt, limbs_A[j]);
+			   	 temp_res_B_odd = nm->mkNode(kind::BITVECTOR_MULT, temp_pt, limbs_B[j]);
+			   	 acc_A_odd = nm->mkNode(kind::BITVECTOR_PLUS, acc_A_odd, temp_res_A_odd);
+			   	 acc_B_odd = nm->mkNode(kind::BITVECTOR_PLUS, acc_B_odd, temp_res_B_odd);
+				    
+				 temp_pt = nm->mkNode(kind::BITVECTOR_MULT, temp_pt, temp_pt);
+				 temp_res_A_even = nm->mkNode(kind::BITVECTOR_MULT, temp_pt, limbs_A[j+1]);
+			   	 temp_res_B_even = nm->mkNode(kind::BITVECTOR_MULT, temp_pt, limbs_B[j+1]);
+			   	 acc_A_even = nm->mkNode(kind::BITVECTOR_PLUS, acc_A_even, temp_res_A_even);
+			   	 acc_B_even = nm->mkNode(kind::BITVECTOR_PLUS, acc_B_even, temp_res_B_even);
+			    }
+			    else{
+				 temp_pt = nm->mkNode(kind::BITVECTOR_MULT, temp_pt, temp_pt);
+			   	 temp_res_A_odd = nm->mkNode(kind::BITVECTOR_MULT, temp_pt, limbs_A[j]);
+			   	 temp_res_B_odd = nm->mkNode(kind::BITVECTOR_MULT, temp_pt, limbs_B[j]);
+			   	 acc_A_odd = nm->mkNode(kind::BITVECTOR_PLUS, acc_A_odd, temp_res_A_odd);
+			   	 acc_B_odd = nm->mkNode(kind::BITVECTOR_PLUS, acc_B_odd, temp_res_B_odd);
+			    }
 		    }
-		    EvalProducts.push_back(nm->mkNode(kind::BITVECTOR_MULT, acc_A, acc_B));
+		   // Node even_odd_sum_A = nm->mkNode(kind::BITVECTOR_PLUS, acc_A_odd, acc_A_even);
+		   // Node even_odd_sum_B = nm->mkNode(kind::BITVECTOR_PLUS, acc_B_odd, acc_B_even);
+		    EvalProducts.push_back(nm->mkNode(kind::BITVECTOR_MULT, 
+						      nm->mkNode(kind::BITVECTOR_PLUS, acc_A_odd, acc_A_even), 
+						      nm->mkNode(kind::BITVECTOR_PLUS, acc_B_odd, acc_B_even)));
 	    }
 	    
 	Trace("KevinsTrace") << "Last eval product: " << *(EvalProducts.end() - 1) << "\n";
