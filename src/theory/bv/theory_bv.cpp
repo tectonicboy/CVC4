@@ -947,8 +947,8 @@ void TheoryBV::presolve() {
 	    bool pair = false;
 	    for(unsigned i = 0; i <= ((2*k) - 4); ++i){
 		    if(i < ((2*k) - 4)){
-			    if(points[i+1] = nm->mkNode(kind::BITVECTOR_MULT,
-							points[i], utils::mkConst(eval_prod_size, -1)))
+			    if(points[i+1] == (nm->mkNode(kind::BITVECTOR_MULT,
+							points[i], utils::mkConst(eval_prod_size, -1))))
 			    {
 			     	    pair = true;
 			    }
