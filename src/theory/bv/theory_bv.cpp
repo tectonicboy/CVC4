@@ -973,8 +973,6 @@ void TheoryBV::presolve() {
 			   	 acc_B_odd = nm->mkNode(kind::BITVECTOR_PLUS, acc_B_odd, temp_res_B_odd);
 			    }
 		    }
-		   // Node even_odd_sum_A = nm->mkNode(kind::BITVECTOR_PLUS, acc_A_odd, acc_A_even);
-		   // Node even_odd_sum_B = nm->mkNode(kind::BITVECTOR_PLUS, acc_B_odd, acc_B_even);
 		    EvalProducts.push_back(nm->mkNode(kind::BITVECTOR_MULT, 
 						      nm->mkNode(kind::BITVECTOR_PLUS, acc_A_odd, acc_A_even), 
 						      nm->mkNode(kind::BITVECTOR_PLUS, acc_B_odd, acc_B_even)));
@@ -1012,7 +1010,7 @@ void TheoryBV::presolve() {
       vector<Node> TC_lemma_nodes;
       string coef_name = "TC_multiply_";
      // string lemma_name = "TC_lemma_";
-      for(int i = 0; i < (2*k) - 1; ++i){
+      for(unsigned i = 0; i < (2*k) - 1; ++i){
 	     string name = coef_name;
 	     name.append(to_string(i));
 	    // string l_name = lemma_name;
@@ -1032,7 +1030,7 @@ void TheoryBV::presolve() {
              // lemma(eval0lemma);
       }
     //Rewrite the lemmas and introduce them.
-     for(int i = 0; i < (2*k) - 1; ++i){
+     for(unsigned i = 0; i < (2*k) - 1; ++i){
 	     Rewriter::rewrite(TC_lemma_nodes[i]);
 	     lemma(TC_lemma_nodes[i]);
      }
