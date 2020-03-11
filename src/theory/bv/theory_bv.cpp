@@ -891,7 +891,7 @@ void TheoryBV::presolve() {
 		end_index += limb_size;
 	}
 	    
-	unsigned last_limb_size = (k * (ceil(n/k))) - n;
+	int last_limb_size = (ceil(n/k)) - ((k * (ceil(n/k))) - n);
 	    Trace("KevinsTrace") << "Last limb size = " << last_limb_size << "\n";
 	if(last_limb_size == 0) { last_limb_size = limb_size; }
 	limbs_A.push_back(utils::mkConcat(utils::mkZero
