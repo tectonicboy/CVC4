@@ -1116,15 +1116,15 @@ void TheoryBV::presolve() {
      */
 	    Trace("KevinsTrace") << "Passing line 1117...\n";
       Node full_product = nm->mkNode(kind::BITVECTOR_PLUS,
-		   nm->mkNode(kind::BITVECTOR_SHL, utils::mkConcat(utils::mkZero(padSize),*(coefficients.end() - 2)), utils::mkConst(2*n,limb_size*1)),
-		   nm->mkNode(kind::BITVECTOR_SHL, utils::mkConcat(utils::mkZero(padSize),*(coefficients.end() - 1)), utils::mkConst(2*n,limb_size*0))
+		   nm->mkNode(kind::BITVECTOR_SHL, utils::mkConcat(utils::mkZero(padSize),*(coefficients.end() - 2)), utils::mkConst((padSize + eval_prod_size),limb_size*1)),
+		   nm->mkNode(kind::BITVECTOR_SHL, utils::mkConcat(utils::mkZero(padSize),*(coefficients.end() - 1)), utils::mkConst((padSize + eval_prod_size),limb_size*0))
 		   );
 	    unsigned short multiple = 2;
       for(int i = (2*k) - 4; i >= 0; --i){
 	      Trace("KevinsTrace") << "ENTERING FOR LOOP. Multiple = " << multiple << ". Adding the shifted coefficient to result.\n";
 	      full_product = nm->mkNode(kind::BITVECTOR_PLUS,
 		full_product, 
-		nm->mkNode(kind::BITVECTOR_SHL, utils::mkConcat(utils::mkZero(padSize),coefficients[i]), utils::mkConst(2*n,limb_size*multiple))
+		nm->mkNode(kind::BITVECTOR_SHL, utils::mkConcat(utils::mkZero(padSize),coefficients[i]), utils::mkConst((padSize + eval_prod_size),limb_size*multiple))
 	      );
 		++multiple;
       }
