@@ -858,7 +858,9 @@ void TheoryBV::presolve() {
       Trace("KevinsTrace") << "Please input n and k.\n";
       cin >> n >> k;
 			double LS = n / k;
+	    Trace("KevinsTrace") << "LS = n / k = " << LS <<"\n";
 			limb_size = ceil(LS);
+	     Trace("KevinsTrace") << "limb_size = ceil(LS) = " << limb_size <<"\n";
 	    end_index = limb_size - 1;
       unsigned eval_prod_size = 2*(((k-1)*point_size) + limb_size + 1); // This will need to be set correctly and may not be the same for each
       Trace("KevinsTrace") << "limb size = " << limb_size << "\n";
