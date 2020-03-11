@@ -1104,7 +1104,7 @@ void TheoryBV::presolve() {
       // Finally link the coefficients and the result
       // Extend to the full 24 bits, then shift each one into place, finally add
       int padSize = 2*n - eval_prod_size;
-      if(padSize < 0) {padSize = 0;} 
+      if(padSize < 0) {padSize = 1;} 
      /* Node fullProduct =
 	nm->mkNode(kind::BITVECTOR_PLUS,
 		   nm->mkNode(kind::BITVECTOR_SHL, utils::mkConcat(utils::mkZero(padSize),a), utils::mkConst(2*n,16)),
