@@ -988,23 +988,37 @@ void TheoryBV::presolve() {
 		 	   for(unsigned j = 2; j <= (k-1); j+=2){
 				    if(j < (k-1)){
 			   		 temp_pt = nm->mkNode(kind::BITVECTOR_MULT, temp_pt, temp_pt);
+					    		    	    	    Trace("KevinsTrace") << "Passing line: " << __LINE__ <<"\n";
 			   		 temp_res_A_odd = nm->mkNode(kind::BITVECTOR_MULT, temp_pt, limbs_A[j]);
+					    		    	    	    Trace("KevinsTrace") << "Passing line: " << __LINE__ <<"\n";
 			   		 temp_res_B_odd = nm->mkNode(kind::BITVECTOR_MULT, temp_pt, limbs_B[j]);
+					    		    	    	    Trace("KevinsTrace") << "Passing line: " << __LINE__ <<"\n";
 			   		 acc_A_odd = nm->mkNode(kind::BITVECTOR_PLUS, acc_A_odd, temp_res_A_odd);
+					    		    	    	    Trace("KevinsTrace") << "Passing line: " << __LINE__ <<"\n";
 			   		 acc_B_odd = nm->mkNode(kind::BITVECTOR_PLUS, acc_B_odd, temp_res_B_odd);
-				    
+				    		    	    	    Trace("KevinsTrace") << "Passing line: " << __LINE__ <<"\n";
 					 temp_pt = nm->mkNode(kind::BITVECTOR_MULT, temp_pt, temp_pt);
+					    		    	    	    Trace("KevinsTrace") << "Passing line: " << __LINE__ <<"\n";
 					 temp_res_A_even = nm->mkNode(kind::BITVECTOR_MULT, temp_pt, limbs_A[j+1]);
+					    		    	    	    Trace("KevinsTrace") << "Passing line: " << __LINE__ <<"\n";
 			  	 	 temp_res_B_even = nm->mkNode(kind::BITVECTOR_MULT, temp_pt, limbs_B[j+1]);
+					    		    	    	    Trace("KevinsTrace") << "Passing line: " << __LINE__ <<"\n";
 			  	 	 acc_A_even = nm->mkNode(kind::BITVECTOR_PLUS, acc_A_even, temp_res_A_even);
+					    		    	    	    Trace("KevinsTrace") << "Passing line: " << __LINE__ <<"\n";
 			   		 acc_B_even = nm->mkNode(kind::BITVECTOR_PLUS, acc_B_even, temp_res_B_even);
+					    		    	    	    Trace("KevinsTrace") << "Passing line: " << __LINE__ <<"\n";
 				    }
 				    else{
 					 temp_pt = nm->mkNode(kind::BITVECTOR_MULT, temp_pt, temp_pt);
+					    		    	    	    Trace("KevinsTrace") << "Passing line: " << __LINE__ <<"\n";
 				   	 temp_res_A_odd = nm->mkNode(kind::BITVECTOR_MULT, temp_pt, limbs_A[j]);
+					    		    	    	    Trace("KevinsTrace") << "Passing line: " << __LINE__ <<"\n";
 				   	 temp_res_B_odd = nm->mkNode(kind::BITVECTOR_MULT, temp_pt, limbs_B[j]);
+					    		    	    	    Trace("KevinsTrace") << "Passing line: " << __LINE__ <<"\n";
 				   	 acc_A_odd = nm->mkNode(kind::BITVECTOR_PLUS, acc_A_odd, temp_res_A_odd);
+					    		    	    	    Trace("KevinsTrace") << "Passing line: " << __LINE__ <<"\n";
 				   	 acc_B_odd = nm->mkNode(kind::BITVECTOR_PLUS, acc_B_odd, temp_res_B_odd);
+					    		    	    	    Trace("KevinsTrace") << "Passing line: " << __LINE__ <<"\n";
 				    }
 		  	  }
 		    	    	    Trace("KevinsTrace") << "Passing line: " << __LINE__ <<"\n";
