@@ -851,11 +851,7 @@ void TheoryBV::presolve() {
       NodeManager *nm = NodeManager::currentNM(); // This is used to make nodes!
 
       //Initialize crucial Toom-Cook values.
-      unsigned n = utils::getSize(*i), k = 0, limb_size = 0, start_index = 0, end_index = 0, point_size;
-      //Trace("KevinsTrace") << "How many bits to reserve for points?\n";
-      //cin >> point_size;
-      point_size = ceil(log2(double(k)-1));
-      Trace("KevinsTrace") << "Computed point size: " << point_size << "\n";
+      unsigned n = utils::getSize(*i), k = 0, limb_size = 0, start_index = 0, end_index = 0;
 	    if(n < 15) {k = 2;}
 	    else if (n >= 15 && n < 65) { k = 4; }
 	    else {Trace("KevinsTrace") << "Error: N is too big. Make sure it's at most 64.\n"; }
@@ -925,22 +921,10 @@ void TheoryBV::presolve() {
 	    else {
 	   	 for(unsigned i = (((2*k) - 4)/2); i > 0; --i){
 			    Trace("KevinsTrace") << "Adding eval points: " << point_pos << " and " << point_neg << "\n";
-			  //  l1:
-			   // cin >> point;
-			 //   string sp = to_string(point);
-			  //  unsigned current_point_bitsize = (ceil((sp.size())*log2(10)));
-			 //   Trace("KevinsTrace") << "Current point bitsize: " << current_point_bitsize << "\n";
-			  //  if(current_point_bitsize > point_size){
-			//	    Trace("KevinsTrace") << "That point is too large, please enter another one...\n";
-			//	    goto l1;
-			 //   }
-			   // else{
 			    	    points.push_back(utils::mkConst(eval_prod_size, point_pos));
 			    	    points.push_back(utils::mkConst(eval_prod_size, point_neg));
 			    ++point_pos;
 			    --point_neg;
-			    
-			 //   }
 	   	 }
 		    //Add the last point.
 		    points.push_back(utils::mkConst(eval_prod_size, point_neg));
@@ -987,26 +971,16 @@ void TheoryBV::presolve() {
 		    	    	    Trace("KevinsTrace") << "Passing line: " << __LINE__ <<"\n";
 		 	   for(unsigned j = 2; j <= (k-1); j+=2){
 				    if(j < (k-1)){
-			   		 temp_pt = nm->mkNode(kind::BITVECTOR_MULT, temp_pt, temp_pt);
-					    		    	    	    Trace("KevinsTrace") << "Passing line: " << __LINE__ <<"\n";
-			   		 temp_res_A_odd = nm->mkNode(kind::BITVECTOR_MULT, temp_pt, limbs_A[j]);
-					    		    	    	    Trace("KevinsTrace") << "Passing line: " << __LINE__ <<"\n";
-			   		 temp_res_B_odd = nm->mkNode(kind::BITVECTOR_MULT, temp_pt, limbs_B[j]);
-					    		    	    	    Trace("KevinsTrace") << "Passing line: " << __LINE__ <<"\n";
-			   		 acc_A_odd = nm->mkNode(kind::BITVECTOR_PLUS, acc_A_odd, temp_res_A_odd);
-					    		    	    	    Trace("KevinsTrace") << "Passing line: " << __LINE__ <<"\n";
-			   		 acc_B_odd = nm->mkNode(kind::BITVECTOR_PLUS, acc_B_odd, temp_res_B_odd);
-				    		    	    	    Trace("KevinsTrace") << "Passing line: " << __LINE__ <<"\n";
-					 temp_pt = nm->mkNode(kind::BITVECTOR_MULT, temp_pt, temp_pt);
-					    		    	    	    Trace("KevinsTrace") << "Passing line: " << __LINE__ <<"\n";
-					 temp_res_A_even = nm->mkNode(kind::BITVECTOR_MULT, temp_pt, limbs_A[j+1]);
-					    		    	    	    Trace("KevinsTrace") << "Passing line: " << __LINE__ <<"\n";
-			  	 	 temp_res_B_even = nm->mkNode(kind::BITVECTOR_MULT, temp_pt, limbs_B[j+1]);
-					    		    	    	    Trace("KevinsTrace") << "Passing line: " << __LINE__ <<"\n";
-			  	 	 acc_A_even = nm->mkNode(kind::BITVECTOR_PLUS, acc_A_even, temp_res_A_even);
-					    		    	    	    Trace("KevinsTrace") << "Passing line: " << __LINE__ <<"\n";
-			   		 acc_B_even = nm->mkNode(kind::BITVECTOR_PLUS, acc_B_even, temp_res_B_even);
-					    		    	    	    Trace("KevinsTrace") << "Passing line: " << __LINE__ <<"\n";
+			   		 temp_pt = nm->mkNode(kind::BITVECTOR_MULT, temp_pt, temp_pt);    		    	    	    
+			   		 temp_res_A_odd = nm->mkNode(kind::BITVECTOR_MULT, temp_pt, limbs_A[j]);					    		    	    	
+			   		 temp_res_B_odd = nm->mkNode(kind::BITVECTOR_MULT, temp_pt, limbs_B[j]);					    		    	    	  
+			   		 acc_A_odd = nm->mkNode(kind::BITVECTOR_PLUS, acc_A_odd, temp_res_A_odd);   		    	    	
+			   		 acc_B_odd = nm->mkNode(kind::BITVECTOR_PLUS, acc_B_odd, temp_res_B_odd);	    	    	    
+					 temp_pt = nm->mkNode(kind::BITVECTOR_MULT, temp_pt, temp_pt);		    	    	   
+					 temp_res_A_even = nm->mkNode(kind::BITVECTOR_MULT, temp_pt, limbs_A[j+1]); //problem here!  		    	    	  
+			  	 	 temp_res_B_even = nm->mkNode(kind::BITVECTOR_MULT, temp_pt, limbs_B[j+1]);  		    	    	
+			  	 	 acc_A_even = nm->mkNode(kind::BITVECTOR_PLUS, acc_A_even, temp_res_A_even); 		    	    	  
+			   		 acc_B_even = nm->mkNode(kind::BITVECTOR_PLUS, acc_B_even, temp_res_B_even);	    	    	 
 				    }
 				    else{
 					 temp_pt = nm->mkNode(kind::BITVECTOR_MULT, temp_pt, temp_pt);
