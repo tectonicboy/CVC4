@@ -974,6 +974,7 @@ void TheoryBV::presolve() {
 			     	    pair = true;
 			    }
 		    }
+		    	    	    Trace("KevinsTrace") << "Passing line: " << __LINE__ <<"\n";
 		   	  Node temp_pt = points[i];
 		   	  Node temp_res_A_even = nm->mkNode(kind::BITVECTOR_MULT, temp_pt, limbs_A[1]);
 		  	  Node temp_res_A_odd = A_low;
@@ -983,6 +984,7 @@ void TheoryBV::presolve() {
 		  	  Node acc_A_odd = temp_res_A_odd;
 		  	  Node acc_B_even = temp_res_B_even;
 		 	  Node acc_B_odd = temp_res_B_odd;
+		    	    	    Trace("KevinsTrace") << "Passing line: " << __LINE__ <<"\n";
 		 	   for(unsigned j = 2; j <= (k-1); j+=2){
 				    if(j < (k-1)){
 			   		 temp_pt = nm->mkNode(kind::BITVECTOR_MULT, temp_pt, temp_pt);
@@ -1005,9 +1007,11 @@ void TheoryBV::presolve() {
 				   	 acc_B_odd = nm->mkNode(kind::BITVECTOR_PLUS, acc_B_odd, temp_res_B_odd);
 				    }
 		  	  }
+		    	    	    Trace("KevinsTrace") << "Passing line: " << __LINE__ <<"\n";
 		  	  EvalProducts.push_back(nm->mkNode(kind::BITVECTOR_MULT, 
 							      nm->mkNode(kind::BITVECTOR_PLUS, acc_A_odd, acc_A_even), 
 							      nm->mkNode(kind::BITVECTOR_PLUS, acc_B_odd, acc_B_even)));
+		    	    	    Trace("KevinsTrace") << "Passing line: " << __LINE__ <<"\n";
 			  if(pair){
 				  acc_A_even = nm->mkNode(kind::BITVECTOR_MULT, acc_A_even,
 							  utils::mkConst(eval_prod_size, -1));
@@ -1019,6 +1023,7 @@ void TheoryBV::presolve() {
 				 	 nm->mkNode(kind::BITVECTOR_PLUS, acc_B_odd, acc_B_even)));
 				  ++i;
 			  }
+		    	    	    Trace("KevinsTrace") << "Passing line: " << __LINE__ <<"\n";
 
 	    }
 	    	    Trace("KevinsTrace") << "Passing line: " << __LINE__ <<"\n";
