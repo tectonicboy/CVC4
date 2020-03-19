@@ -851,18 +851,22 @@ void TheoryBV::presolve() {
       NodeManager *nm = NodeManager::currentNM(); // This is used to make nodes!
 
       //Initialize crucial Toom-Cook values.
-      unsigned n = 0, k = 0, limb_size = 0, start_index = 0, end_index = 0, point_size;
+      unsigned n = utils::getSize(*i), k = 0, limb_size = 0, start_index = 0, end_index = 0, point_size;
       //Trace("KevinsTrace") << "How many bits to reserve for points?\n";
       //cin >> point_size;
-      point_size = 32;
-      Trace("KevinsTrace") << "Please input n and k.\n";
-      cin >> n >> k;
+      point_size = ceil(log2(double(k)-1));
+      Trace("KevinsTrace") << "Computed point size: " << point_size << "\n";
+	    if(n < 15) {k = 2;}
+	    else if (n >= 15 && n < 65) { k = 4; }
+	    else {Trace("KevinsTrace") << "Error: N is too big. Make sure it's at most 64.\n"; }
 			double LS = double(n) / double(k);
 	    Trace("KevinsTrace") << "LS = n / k = " << LS <<"\n";
 			limb_size = ceil(LS);
 	     Trace("KevinsTrace") << "limb_size = ceil(LS) = " << limb_size <<"\n";
 	    end_index = limb_size - 1;
-      unsigned eval_prod_size = 2*(((k-1)*point_size) + limb_size + 1); // This will need to be set correctly and may not be the same for each
+      unsigned eval_prod_size; // This will need to be set correctly and may not be the same for each
+	    if(k == 2) { eval_prod_size = (2 *( (ceil(double(n)/double(k))) + 2)) + 1; }
+	    else { eval_prod_size = (2 *( (ceil(double(n)/double(k))) + 5)) + 1; }
       Trace("KevinsTrace") << "limb size = " << limb_size << "\n";
       Trace("KevinsTrace") << "max eval product size = " << eval_prod_size << "\n";
 	    
@@ -911,23 +915,35 @@ void TheoryBV::presolve() {
 	    
 	    //Inputting points. Zero and infinity are always chosen by default.
 	    Trace("KevinsTrace") << "Please input " << ((2*k) - 3) << "points.\n";
-	    short point;
+	    short point_pos = 1, point_neg = -1;
 	    vector<Node> points;
 	    //Populate the array of points.
-	    for(unsigned i = ((2*k) - 3); i > 0; --i){
-		    Trace("KevinsTrace") << "Input a point...\n";
-		  //  l1:
-		    cin >> point;
-		 //   string sp = to_string(point);
-		  //  unsigned current_point_bitsize = (ceil((sp.size())*log2(10)));
-		 //   Trace("KevinsTrace") << "Current point bitsize: " << current_point_bitsize << "\n";
-		  //  if(current_point_bitsize > point_size){
-		//	    Trace("KevinsTrace") << "That point is too large, please enter another one...\n";
-		//	    goto l1;
-		 //   }
-		   // else{
-		    	    points.push_back(utils::mkConst(eval_prod_size, point));
-		 //   }
+	    if(k == 2) { 
+		    Trace("KevinsTrace") << "Adding eval point: -1\n";
+		    points.push_back(utils::mkConst(eval_prod_size, point_neg));
+	    }
+	    else {
+	   	 for(unsigned i = (((2*k) - 4)/2); i > 0; --i){
+			    Trace("KevinsTrace") << "Adding eval points: " << point_pos << " and " << point_neg << "\n";
+			  //  l1:
+			   // cin >> point;
+			 //   string sp = to_string(point);
+			  //  unsigned current_point_bitsize = (ceil((sp.size())*log2(10)));
+			 //   Trace("KevinsTrace") << "Current point bitsize: " << current_point_bitsize << "\n";
+			  //  if(current_point_bitsize > point_size){
+			//	    Trace("KevinsTrace") << "That point is too large, please enter another one...\n";
+			//	    goto l1;
+			 //   }
+			   // else{
+			    	    points.push_back(utils::mkConst(eval_prod_size, point_pos));
+			    	    points.push_back(utils::mkConst(eval_prod_size, point_neg));
+			    ++point_pos;
+			    --point_neg;
+			    
+			 //   }
+	   	 }
+		    //Add the last point.
+		    points.push_back(utils::mkConst(eval_prod_size, point_neg));
 	    }
 	    //Evaluate at each point. Put the results in a vector<Node>.
 	    vector<Node> EvalProducts;
