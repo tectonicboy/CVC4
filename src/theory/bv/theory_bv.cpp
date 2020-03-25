@@ -966,18 +966,29 @@ void TheoryBV::presolve() {
 		    	    	    Trace("KevinsTrace") << "Passing line: " << __LINE__ <<"\n";
 	   	 for(unsigned i = 0; i <= ((2*k) - 4); ++i){
 		   	  Node temp_pt = points[i];
+			 		    	    	    Trace("KevinsTrace") << "Passing line: " << __LINE__ <<"\n";
 		  	  Node temp_res_A = A_low;
+			 		    	    	    Trace("KevinsTrace") << "Passing line: " << __LINE__ <<"\n";
 		  	  Node temp_res_B = B_low;
+			 		    	    	    Trace("KevinsTrace") << "Passing line: " << __LINE__ <<"\n";
 		  	  Node acc_A = temp_res_A;
+			 		    	    	    Trace("KevinsTrace") << "Passing line: " << __LINE__ <<"\n";
 		 	  Node acc_B = temp_res_B;
+			 		    	    	    Trace("KevinsTrace") << "Passing line: " << __LINE__ <<"\n";
 		 	   for(unsigned j = 1; j <= (k-1); ++j){
-			   		 temp_pt = nm->mkNode(kind::BITVECTOR_MULT, temp_pt, temp_pt);    		    	    	    
-			   		 temp_res_A = nm->mkNode(kind::BITVECTOR_MULT, temp_pt, limbs_A[j]);					    		    	    	
-			   		 temp_res_B = nm->mkNode(kind::BITVECTOR_MULT, temp_pt, limbs_B[j]);					    		    	    	  
-			   		 acc_A = nm->mkNode(kind::BITVECTOR_PLUS, acc_A, temp_res_A);   		    	    	
+			   		 temp_pt = nm->mkNode(kind::BITVECTOR_MULT, temp_pt, temp_pt);  
+				   		    	    	    Trace("KevinsTrace") << "Passing line: " << __LINE__ <<"\n";
+			   		 temp_res_A = nm->mkNode(kind::BITVECTOR_MULT, temp_pt, limbs_A[j]);	
+				   		    	    	    Trace("KevinsTrace") << "Passing line: " << __LINE__ <<"\n";
+			   		 temp_res_B = nm->mkNode(kind::BITVECTOR_MULT, temp_pt, limbs_B[j]);	
+				   		    	    	    Trace("KevinsTrace") << "Passing line: " << __LINE__ <<"\n";
+			   		 acc_A = nm->mkNode(kind::BITVECTOR_PLUS, acc_A, temp_res_A);   
+				   		    	    	    Trace("KevinsTrace") << "Passing line: " << __LINE__ <<"\n";
 			   		 acc_B = nm->mkNode(kind::BITVECTOR_PLUS, acc_B, temp_res_B);    
+				   		    	    	    Trace("KevinsTrace") << "Passing line: " << __LINE__ <<"\n";
 		  	  }
-		  	  EvalProducts.push_back(nm->mkNode(kind::BITVECTOR_MULT, acc_A, acc_B)); 			      
+		  	  EvalProducts.push_back(nm->mkNode(kind::BITVECTOR_MULT, acc_A, acc_B)); 
+			 		    	    	    Trace("KevinsTrace") << "Passing line: " << __LINE__ <<"\n";
 	   	 }
 		    	    	    Trace("KevinsTrace") << "Passing line: " << __LINE__ <<"\n";
 	    }
