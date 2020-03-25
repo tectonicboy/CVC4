@@ -960,7 +960,7 @@ void TheoryBV::presolve() {
 		 	   for(unsigned j = 1; j <= (k-1); ++j){
 			   		 temp_pt = nm->mkNode(kind::BITVECTOR_MULT, temp_pt, temp_pt);  
 
-			   		 temp_res_A = nm->mkNode(kind::BITVECTOR_MULT, temp_pt, limbs_A[j]);	//problem here
+			   		 temp_res_A = nm->mkNode(kind::BITVECTOR_MULT, temp_pt, limbs_A[j]);
 
 			   		 temp_res_B = nm->mkNode(kind::BITVECTOR_MULT, temp_pt, limbs_B[j]);	
 
