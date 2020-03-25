@@ -855,7 +855,10 @@ void TheoryBV::presolve() {
 	    if(n < 16) {k = 3;}
 	    else if ((n > 15) && (n < 65)) {k = 4;}
 	   
-	    else {Trace("KevinsTrace") << "Error: N is too big. Make sure it's at most 64.\n"; }
+	    else {
+		    Trace("KevinsTrace") << "Error: N is too big. Make sure it's at most 64.\n"; 
+		    Assert(n < 65);
+	    }
 	    Trace("KevinsTrace") << "k was chosen to be: " << k << "\n";
 	    double LS = double(n) / double(k);
 	    Trace("KevinsTrace") << "LS = n / k = " << LS <<"\n";
@@ -905,7 +908,7 @@ void TheoryBV::presolve() {
 					  (eval_prod_size - last_limb_size), 
 					  (utils::mkExtract(right, (n-1), start_index))));
 	
-	
+	//Wouldn't work for k = 2, and would give wrong results when k > 3. FIX IT!
 	Trace("KevinsTrace") << "Left LSBs: " << limbs_A[0] << "\n";
 	Trace("KevinsTrace") << "Left Mid: " << limbs_A[1] << "\n";
 	Trace("KevinsTrace") << "Left MSBs: " << limbs_A[2] << "\n";
@@ -1029,7 +1032,9 @@ void TheoryBV::presolve() {
 
     //Rewrite the lemmas and introduce them.
      for(unsigned i = 0; i < (2*k) - 1; ++i){
-	     Rewriter::rewrite(TC_lemma_nodes[i]);
+	     Trace("KevinsTrace") << "Rewriting lemma: " << TC_lemma_nodes[i] << "\n";
+	     TC_lemma_nodes[i] = Rewriter::rewrite(TC_lemma_nodes[i]);
+	     Trace("KevinsTrace") << "Adding re-written lemma: " << TC_lemma_nodes[i] << "\n";
 	     lemma(TC_lemma_nodes[i]);
      }
 
@@ -1128,12 +1133,12 @@ void TheoryBV::presolve() {
 		++multiple;
       }
 
-     // Trace("bitvector::TCMultiplier") << "Full product expression " << fullProduct << "\n";
+      Trace("bitvector::TCMultiplier") << "Full product expression " << fullProduct << "\n";
       Trace("KevinsTrace") << "Full product (kevin's): " << full_product << "\n";
 	
       Node coefficientsToResultLemma =
 	nm->mkNode(kind::EQUAL, utils::mkExtract(full_product, n-1, 0), result);
-      //Trace("bitvector::TCMultiplier") << "Link full product and result " << coefficientsToResultLemma << "\n";
+      Trace("bitvector::TCMultiplier") << "Link full product and result " << coefficientsToResultLemma << "\n";
       Trace("KevinsTrace") << "Link the full product and the result: " << coefficientsToResultLemma << "\n";
 		    Trace("KevinsTrace") << "Passing line: " << __LINE__ <<"\n";
       points = {}; coefficients = {};
