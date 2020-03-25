@@ -894,7 +894,7 @@ void TheoryBV::presolve() {
 		end_index += limb_size;
 	}
 	    
-	int last_limb_size = (ceil(n/k)) - ((k * (ceil(n/k))) - n);
+	unsigned last_limb_size = n - ((k-1) * limb_size) ;
 	    Trace("KevinsTrace") << "Last limb size = " << last_limb_size << "\n";
 	if(last_limb_size == 0) { last_limb_size = limb_size; }
 	limbs_A.push_back(utils::mkConcat(utils::mkZero
@@ -966,15 +966,15 @@ void TheoryBV::presolve() {
 		    	    	    Trace("KevinsTrace") << "Passing line: " << __LINE__ <<"\n";
 	   	 for(unsigned i = 0; i <= ((2*k) - 4); ++i){
 		   	  Node temp_pt = points[i];
-			 		    	    	    Trace("KevinsTrace") << "Passing line: " << __LINE__ <<"\n";
+			  Trace("KevinsTrace") << "Passing line: " << __LINE__ <<"\n";
 		  	  Node temp_res_A = A_low;
-			 		    	    	    Trace("KevinsTrace") << "Passing line: " << __LINE__ <<"\n";
+			  Trace("KevinsTrace") << "Passing line: " << __LINE__ <<"\n";
 		  	  Node temp_res_B = B_low;
-			 		    	    	    Trace("KevinsTrace") << "Passing line: " << __LINE__ <<"\n";
+			  Trace("KevinsTrace") << "Passing line: " << __LINE__ <<"\n";
 		  	  Node acc_A = temp_res_A;
-			 		    	    	    Trace("KevinsTrace") << "Passing line: " << __LINE__ <<"\n";
+			  Trace("KevinsTrace") << "Passing line: " << __LINE__ <<"\n";
 		 	  Node acc_B = temp_res_B;
-			 		    	    	    Trace("KevinsTrace") << "Passing line: " << __LINE__ <<"\n";
+			  Trace("KevinsTrace") << "Passing line: " << __LINE__ <<"\n";
 		 	   for(unsigned j = 1; j <= (k-1); ++j){
 			   		 temp_pt = nm->mkNode(kind::BITVECTOR_MULT, temp_pt, temp_pt);  
 				   	 Trace("KevinsTrace") << "Passing line: " << __LINE__ <<". j = " << j << "\n";
