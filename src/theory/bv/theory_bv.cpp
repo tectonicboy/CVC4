@@ -852,8 +852,8 @@ void TheoryBV::presolve() {
 
       //Initialize crucial Toom-Cook values.
             unsigned n = utils::getSize(*i), k = 0, limb_size = 0, start_index = 0, end_index = 0;
-	    if(n < 15) {k = 2;}
-	    else if (n >= 15 && n < 65) { k = 4; }
+	    if(n < 65) {k = 4;}
+	   
 	    else {Trace("KevinsTrace") << "Error: N is too big. Make sure it's at most 64.\n"; }
 	    Trace("KevinsTrace") << "k was chosen to be: " << k << "\n";
 	    double LS = double(n) / double(k);
@@ -914,11 +914,6 @@ void TheoryBV::presolve() {
 	    short point_pos = 1, point_neg = -1;
 	    vector<Node> points;
 	    //Populate the array of points.
-	    if(k == 2) { 
-		    Trace("KevinsTrace") << "Adding eval point: -1\n";
-		    points.push_back(utils::mkConst(eval_prod_size, point_neg));
-	    }
-	    else {
 	   	 for(unsigned i = 1; i < (2*k - 2)/2; ++i){ //Add all 2k-3 points except one,cuz we add by (+, -) pairs.
 			    Trace("KevinsTrace") << "Adding eval points: " << point_pos << " and " << point_neg << "\n";
 			    	    points.push_back(utils::mkConst(eval_prod_size, point_pos));
@@ -929,7 +924,7 @@ void TheoryBV::presolve() {
 		    //Add the last point.
 		    Trace("KevinsTrace") << "Adding eval point: " << point_neg << "\n";
 		    points.push_back(utils::mkConst(eval_prod_size, point_neg));
-	    }
+	    
 	    
 	    //Evaluate at each point. Put the results in a vector<Node>.
 	    vector<Node> EvalProducts;
@@ -948,22 +943,9 @@ void TheoryBV::presolve() {
 	    Node eval_inf_B = *(limbs_B.end() - 1);
 	    EvalProducts.push_back(nm->mkNode(kind::BITVECTOR_MULT, eval_inf_A, eval_inf_B));
 	    //Eval at all other points.
-	    if (k == 2) { //Eval at -1, only point needed for k=2.
-		    Node temp_pt = points[0];
-		    Node accumulator_A = limbs_A[0];
-		    Node accumulator_B = limbs_B[0];
-		    for(unsigned i = 1; i < limbs_A.size(); ++i){
-			    temp_pt = nm->mkNode(kind::BITVECTOR_MULT, temp_pt, temp_pt);
-			    accumulator_A = nm->mkNode(kind::BITVECTOR_MULT, temp_pt, limbs_A[i]);
-			    accumulator_B = nm->mkNode(kind::BITVECTOR_MULT, temp_pt, limbs_B[i]);
-				    
-		    }
-		    EvalProducts.push_back(nm->mkNode(kind::BITVECTOR_MULT, accumulator_A, accumulator_B));
-	    }
-	    else {
 	   	 Node A_low = limbs_A[0];  
            	 Node B_low = limbs_B[0];
-		    	    	    Trace("KevinsTrace") << "Passing line: " << __LINE__ <<"\n";
+		 Trace("KevinsTrace") << "Passing line: " << __LINE__ <<"\n";
 	   	 for(unsigned i = 0; i <= ((2*k) - 4); ++i){
 		   	  Node temp_pt = points[i];
 			  Trace("KevinsTrace") << "Passing line: " << __LINE__ <<"\n";
@@ -991,7 +973,7 @@ void TheoryBV::presolve() {
 			 		    	    	    Trace("KevinsTrace") << "Passing line: " << __LINE__ <<"\n";
 	   	 }
 		    	    	    Trace("KevinsTrace") << "Passing line: " << __LINE__ <<"\n";
-	    }
+	   
 	Trace("KevinsTrace") << "Last eval product: " << *(EvalProducts.end() - 1) << "\n";
 	    
 	    
@@ -1119,7 +1101,6 @@ void TheoryBV::presolve() {
       // Extend to the full 24 bits, then shift each one into place, finally add
       int padSize = 2*n - eval_prod_size;
 	    	    Trace("KevinsTrace") << "Passing line: " << __LINE__ <<"\n";
-      if(padSize < 0) {padSize = 1;} 
      /* Node fullProduct =
 	nm->mkNode(kind::BITVECTOR_PLUS,
 		   nm->mkNode(kind::BITVECTOR_SHL, utils::mkConcat(utils::mkZero(padSize),a), utils::mkConst(2*n,16)),
@@ -1131,8 +1112,10 @@ void TheoryBV::presolve() {
      */
 	    Trace("KevinsTrace") << "Passing line: " << __LINE__ <<"\n";
       Node full_product = nm->mkNode(kind::BITVECTOR_PLUS,
-		   nm->mkNode(kind::BITVECTOR_SHL, utils::mkConcat(utils::mkZero(padSize),*(coefficients.end() - 2)), utils::mkConst((padSize + eval_prod_size),limb_size*1)),
-		   nm->mkNode(kind::BITVECTOR_SHL, utils::mkConcat(utils::mkZero(padSize),*(coefficients.end() - 1)), utils::mkConst((padSize + eval_prod_size),limb_size*0))
+		   nm->mkNode(kind::BITVECTOR_SHL, utils::mkConcat(utils::mkZero(padSize),*(coefficients.end() - 2)), 
+			      utils::mkConst((padSize + eval_prod_size),limb_size*1)),
+		   nm->mkNode(kind::BITVECTOR_SHL, utils::mkConcat(utils::mkZero(padSize),*(coefficients.end() - 1)), 
+			      utils::mkConst((padSize + eval_prod_size),limb_size*0))
 		   );
 	    	    Trace("KevinsTrace") << "Passing line: " << __LINE__ <<"\n";
 	    unsigned short multiple = 2;
