@@ -852,7 +852,8 @@ void TheoryBV::presolve() {
 
       //Initialize crucial Toom-Cook values.
             unsigned n = utils::getSize(*i), k = 0, limb_size = 0, start_index = 0, end_index = 0;
-	    if(n < 65) {k = 4;}
+	    if(n < 16) {k = 3;}
+	    else if (n < 65) {k = 4;}
 	   
 	    else {Trace("KevinsTrace") << "Error: N is too big. Make sure it's at most 64.\n"; }
 	    Trace("KevinsTrace") << "k was chosen to be: " << k << "\n";
