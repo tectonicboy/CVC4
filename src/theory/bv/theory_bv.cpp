@@ -918,7 +918,7 @@ void TheoryBV::presolve() {
 		    points.push_back(utils::mkConst(eval_prod_size, point_neg));
 	    }
 	    else {
-	   	 for(unsigned i = 1; i < (2*k - 3); ++i){ //Add all 2k-3 points except one,cuz we add by (+, -) pairs.
+	   	 for(unsigned i = 2; i < (2*k - 2)/2; ++i){ //Add all 2k-3 points except one,cuz we add by (+, -) pairs.
 			    Trace("KevinsTrace") << "Adding eval points: " << point_pos << " and " << point_neg << "\n";
 			    	    points.push_back(utils::mkConst(eval_prod_size, point_pos));
 			    	    points.push_back(utils::mkConst(eval_prod_size, point_neg));
