@@ -910,7 +910,6 @@ void TheoryBV::presolve() {
        
 	    
 	    //Inputting points. Zero and infinity are always chosen by default.
-	    Trace("KevinsTrace") << "Please input " << ((2*k) - 3) << "points.\n";
 	    short point_pos = 1, point_neg = -1;
 	    vector<Node> points;
 	    //Populate the array of points.
@@ -919,7 +918,7 @@ void TheoryBV::presolve() {
 		    points.push_back(utils::mkConst(eval_prod_size, point_neg));
 	    }
 	    else {
-	   	 for(unsigned i = (((2*k) - 4)/2); i > 0; --i){
+	   	 for(unsigned i = 1; i < (2*k - 3); ++i){ //Add all 2k-3 points except one,cuz we add by (+, -) pairs.
 			    Trace("KevinsTrace") << "Adding eval points: " << point_pos << " and " << point_neg << "\n";
 			    	    points.push_back(utils::mkConst(eval_prod_size, point_pos));
 			    	    points.push_back(utils::mkConst(eval_prod_size, point_neg));
@@ -927,8 +926,10 @@ void TheoryBV::presolve() {
 			    --point_neg;
 	   	 }
 		    //Add the last point.
+		    Trace("KevinsTrace") << "Adding eval point: " << point_neg << "\n";
 		    points.push_back(utils::mkConst(eval_prod_size, point_neg));
 	    }
+	    
 	    //Evaluate at each point. Put the results in a vector<Node>.
 	    vector<Node> EvalProducts;
 	    Trace("KevinsTrace") << "Passing line: " << __LINE__ <<"\n";
@@ -946,75 +947,37 @@ void TheoryBV::presolve() {
 	    Node eval_inf_B = *(limbs_B.end() - 1);
 	    EvalProducts.push_back(nm->mkNode(kind::BITVECTOR_MULT, eval_inf_A, eval_inf_B));
 	    //Eval at all other points.
-	    Node A_low = limbs_A[0];  
-            Node B_low = limbs_B[0];
-	    bool pair = false;
-	    	    Trace("KevinsTrace") << "Passing line: " << __LINE__ <<"\n";
-	    for(unsigned i = 0; i <= ((2*k) - 4); ++i){
-		    if(i < ((2*k) - 4)){
-			    if(points[i+1] == (nm->mkNode(kind::BITVECTOR_MULT,
-							points[i], utils::mkConst(eval_prod_size, -1))))
-			    {
-			     	    pair = true;
-			    }
+	    if (k == 2) { //Eval at -1, only point needed for k=2.
+		    Node temp_pt = points[0];
+		    Node accumulator_A = limbs_A[0];
+		    Node accumulator_B = limbs_B[0];
+		    for(unsigned i = 1; i < limbs_A.size(); ++i){
+			    temp_pt = nm->mkNode(kind::BITVECTOR_MULT, temp_pt, temp_pt);
+			    accumulator_A = nm->mkNode(kind::BITVECTOR_MULT, temp_pt, limbs_A[i]);
+			    accumulator_B = nm->mkNode(kind::BITVECTOR_MULT, temp_pt, limbs_B[i]);
+				    
 		    }
-		    	    	    Trace("KevinsTrace") << "Passing line: " << __LINE__ <<"\n";
-		   	  Node temp_pt = points[i];
-		   	  Node temp_res_A_even = nm->mkNode(kind::BITVECTOR_MULT, temp_pt, limbs_A[1]);
-		  	  Node temp_res_A_odd = A_low;
-		  	  Node temp_res_B_even = nm->mkNode(kind::BITVECTOR_MULT, temp_pt, limbs_B[1]);
-		  	  Node temp_res_B_odd = B_low;
-		  	  Node acc_A_even = temp_res_A_even;
-		  	  Node acc_A_odd = temp_res_A_odd;
-		  	  Node acc_B_even = temp_res_B_even;
-		 	  Node acc_B_odd = temp_res_B_odd;
-		    	    	    Trace("KevinsTrace") << "Passing line: " << __LINE__ <<"\n";
-		 	   for(unsigned j = 2; j <= (k-1); j+=2){
-				    if(j < (k-1)){
-			   		 temp_pt = nm->mkNode(kind::BITVECTOR_MULT, temp_pt, temp_pt);    		    	    	    
-			   		 temp_res_A_odd = nm->mkNode(kind::BITVECTOR_MULT, temp_pt, limbs_A[j]);					    		    	    	
-			   		 temp_res_B_odd = nm->mkNode(kind::BITVECTOR_MULT, temp_pt, limbs_B[j]);					    		    	    	  
-			   		 acc_A_odd = nm->mkNode(kind::BITVECTOR_PLUS, acc_A_odd, temp_res_A_odd);   		    	    	
-			   		 acc_B_odd = nm->mkNode(kind::BITVECTOR_PLUS, acc_B_odd, temp_res_B_odd);	    	    	    
-					 temp_pt = nm->mkNode(kind::BITVECTOR_MULT, temp_pt, temp_pt);		    	    	   
-					 temp_res_A_even = nm->mkNode(kind::BITVECTOR_MULT, temp_pt, limbs_A[j+1]); //problem here!  		    	    	  
-			  	 	 temp_res_B_even = nm->mkNode(kind::BITVECTOR_MULT, temp_pt, limbs_B[j+1]);  		    	    	
-			  	 	 acc_A_even = nm->mkNode(kind::BITVECTOR_PLUS, acc_A_even, temp_res_A_even); 		    	    	  
-			   		 acc_B_even = nm->mkNode(kind::BITVECTOR_PLUS, acc_B_even, temp_res_B_even);	    	    	 
-				    }
-				    else{
-					 temp_pt = nm->mkNode(kind::BITVECTOR_MULT, temp_pt, temp_pt);
-					    		    	    	    Trace("KevinsTrace") << "Passing line: " << __LINE__ <<"\n";
-				   	 temp_res_A_odd = nm->mkNode(kind::BITVECTOR_MULT, temp_pt, limbs_A[j]);
-					    		    	    	    Trace("KevinsTrace") << "Passing line: " << __LINE__ <<"\n";
-				   	 temp_res_B_odd = nm->mkNode(kind::BITVECTOR_MULT, temp_pt, limbs_B[j]);
-					    		    	    	    Trace("KevinsTrace") << "Passing line: " << __LINE__ <<"\n";
-				   	 acc_A_odd = nm->mkNode(kind::BITVECTOR_PLUS, acc_A_odd, temp_res_A_odd);
-					    		    	    	    Trace("KevinsTrace") << "Passing line: " << __LINE__ <<"\n";
-				   	 acc_B_odd = nm->mkNode(kind::BITVECTOR_PLUS, acc_B_odd, temp_res_B_odd);
-					    		    	    	    Trace("KevinsTrace") << "Passing line: " << __LINE__ <<"\n";
-				    }
-		  	  }
-		    	    	    Trace("KevinsTrace") << "Passing line: " << __LINE__ <<"\n";
-		  	  EvalProducts.push_back(nm->mkNode(kind::BITVECTOR_MULT, 
-							      nm->mkNode(kind::BITVECTOR_PLUS, acc_A_odd, acc_A_even), 
-							      nm->mkNode(kind::BITVECTOR_PLUS, acc_B_odd, acc_B_even)));
-		    	    	    Trace("KevinsTrace") << "Passing line: " << __LINE__ <<"\n";
-			  if(pair){
-				  acc_A_even = nm->mkNode(kind::BITVECTOR_MULT, acc_A_even,
-							  utils::mkConst(eval_prod_size, -1));
-				  acc_B_even = nm->mkNode(kind::BITVECTOR_MULT, acc_B_even,
-							  utils::mkConst(eval_prod_size, -1));
-							  
-				  EvalProducts.push_back(nm->mkNode(kind::BITVECTOR_MULT, 
-				 	 nm->mkNode(kind::BITVECTOR_PLUS, acc_A_odd, acc_A_even), 
-				 	 nm->mkNode(kind::BITVECTOR_PLUS, acc_B_odd, acc_B_even)));
-				  ++i;
-			  }
-		    	    	    Trace("KevinsTrace") << "Passing line: " << __LINE__ <<"\n";
-
+		    EvalProducts.push_back(nm->mkNode(kind::BITVECTOR_MULT, accumulator_A, accumulator_B));
 	    }
-	    	    Trace("KevinsTrace") << "Passing line: " << __LINE__ <<"\n";
+	    else {
+	   	 Node A_low = limbs_A[0];  
+           	 Node B_low = limbs_B[0];
+	   	 for(unsigned i = 0; i <= ((2*k) - 4); ++i){
+		   	  Node temp_pt = points[i];
+		  	  Node temp_res_A = A_low;
+		  	  Node temp_res_B = B_low;
+		  	  Node acc_A = temp_res_A;
+		 	  Node acc_B = temp_res_B;
+		 	   for(unsigned j = 1; j <= (k-1); ++j){
+			   		 temp_pt = nm->mkNode(kind::BITVECTOR_MULT, temp_pt, temp_pt);    		    	    	    
+			   		 temp_res_A = nm->mkNode(kind::BITVECTOR_MULT, temp_pt, limbs_A[j]);					    		    	    	
+			   		 temp_res_B = nm->mkNode(kind::BITVECTOR_MULT, temp_pt, limbs_B[j]);					    		    	    	  
+			   		 acc_A = nm->mkNode(kind::BITVECTOR_PLUS, acc_A, temp_res_A);   		    	    	
+			   		 acc_B = nm->mkNode(kind::BITVECTOR_PLUS, acc_B, temp_res_B);    
+		  	  }
+		  	  EvalProducts.push_back(nm->mkNode(kind::BITVECTOR_MULT, acc_A, acc_B)); 			      
+	   	 }
+	    }
 	Trace("KevinsTrace") << "Last eval product: " << *(EvalProducts.end() - 1) << "\n";
 	    
 	    
