@@ -851,20 +851,21 @@ void TheoryBV::presolve() {
       NodeManager *nm = NodeManager::currentNM(); // This is used to make nodes!
 
       //Initialize crucial Toom-Cook values.
-      unsigned n = utils::getSize(*i), k = 0, limb_size = 0, start_index = 0, end_index = 0;
+            unsigned n = utils::getSize(*i), k = 0, limb_size = 0, start_index = 0, end_index = 0;
 	    if(n < 15) {k = 2;}
 	    else if (n >= 15 && n < 65) { k = 4; }
 	    else {Trace("KevinsTrace") << "Error: N is too big. Make sure it's at most 64.\n"; }
-			double LS = double(n) / double(k);
+	    Trace("KevinsTrace") << "k was chosen to be: " << k << "\n";
+	    double LS = double(n) / double(k);
 	    Trace("KevinsTrace") << "LS = n / k = " << LS <<"\n";
-			limb_size = ceil(LS);
-	     Trace("KevinsTrace") << "limb_size = ceil(LS) = " << limb_size <<"\n";
+	    limb_size = ceil(LS);
+	    Trace("KevinsTrace") << "limb_size = ceil(LS) = " << limb_size <<"\n";
 	    end_index = limb_size - 1;
-      unsigned eval_prod_size; // This will need to be set correctly and may not be the same for each
+      	    unsigned eval_prod_size; // This will need to be set correctly and may not be the same for each
 	    if(k == 2) { eval_prod_size = (2 *( (ceil(double(n)/double(k))) + 2)) + 1; }
 	    else { eval_prod_size = (2 *( (ceil(double(n)/double(k))) + 5)) + 1; }
-      Trace("KevinsTrace") << "limb size = " << limb_size << "\n";
-      Trace("KevinsTrace") << "max eval product size = " << eval_prod_size << "\n";
+            Trace("KevinsTrace") << "limb size = " << limb_size << "\n";
+            Trace("KevinsTrace") << "max eval product size = " << eval_prod_size << "\n";
 	    
 	    
       
@@ -962,6 +963,7 @@ void TheoryBV::presolve() {
 	    else {
 	   	 Node A_low = limbs_A[0];  
            	 Node B_low = limbs_B[0];
+		    	    	    Trace("KevinsTrace") << "Passing line: " << __LINE__ <<"\n";
 	   	 for(unsigned i = 0; i <= ((2*k) - 4); ++i){
 		   	  Node temp_pt = points[i];
 		  	  Node temp_res_A = A_low;
@@ -977,6 +979,7 @@ void TheoryBV::presolve() {
 		  	  }
 		  	  EvalProducts.push_back(nm->mkNode(kind::BITVECTOR_MULT, acc_A, acc_B)); 			      
 	   	 }
+		    	    	    Trace("KevinsTrace") << "Passing line: " << __LINE__ <<"\n";
 	    }
 	Trace("KevinsTrace") << "Last eval product: " << *(EvalProducts.end() - 1) << "\n";
 	    
