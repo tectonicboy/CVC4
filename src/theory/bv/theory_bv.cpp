@@ -952,35 +952,23 @@ void TheoryBV::presolve() {
 
 	   	 for(unsigned i = 0; i <= ((2*k) - 4); ++i){
 		   	  Node temp_pt = points[i];
-
 		  	  Node temp_res_A = A_low;
-
 		  	  Node temp_res_B = B_low;
-
 		  	  Node acc_A = temp_res_A;
-
 		 	  Node acc_B = temp_res_B;
-
 		 	   for(unsigned j = 1; j <= (k-1); ++j){
 			   		 temp_pt = nm->mkNode(kind::BITVECTOR_MULT, temp_pt, temp_pt);  
-
 			   		 temp_res_A = nm->mkNode(kind::BITVECTOR_MULT, temp_pt, limbs_A[j]);
-
 			   		 temp_res_B = nm->mkNode(kind::BITVECTOR_MULT, temp_pt, limbs_B[j]);	
-
 			   		 acc_A = nm->mkNode(kind::BITVECTOR_PLUS, acc_A, temp_res_A);   
-
 			   		 acc_B = nm->mkNode(kind::BITVECTOR_PLUS, acc_B, temp_res_B);    
-
 		  	  }
 		  	  EvalProducts.push_back(nm->mkNode(kind::BITVECTOR_MULT, acc_A, acc_B)); 
-
 	   	 }
 
 	   
 	Trace("KevinsTrace") << "Last eval product: " << *(EvalProducts.end() - 1) << "\n";
-	    
-	    
+	    	    
 	    
 	//k = 3 so split each input into it's three parts
 	/*
@@ -1023,13 +1011,43 @@ void TheoryBV::presolve() {
 			  left,
 			  right));
 	      Trace("KevinsTrace") << "x^" << i << " coefficient: " << *(coefficients.end() - 1) << "\n";
+	      
 	      //Change that 
-	      TC_lemma_nodes.push_back(nm->mkNode(kind::EQUAL, EvalProducts[i], *(coefficients.end() - 1)));
+	    
+	     // TC_lemma_nodes.push_back(nm->mkNode(kind::EQUAL, EvalProducts[i], *(coefficients.end() - 1))); //WRONG!
+	      
 	     // Node eval0lemma = nm->mkNode(kind::EQUAL, eval0product, e);
      	     //Trace("bitvector::TCMultiplier") << "Adding lemma " << eval0lemma << "\n";
              // lemma(eval0lemma);
       }
-
+	    
+	    
+	    
+	    //*************************************************************************
+	    //******************* NEW AND CORRECT (?) LEMMAS **************************
+	    //*************************************************************************
+	    
+	    //Eval product at 0 equals x^0 coefficient
+	TC_lemma_nodes.push_back(nm->mkNode(kind::EQUAL, EvalProducts[0], *(coefficients.begin())));
+	    
+	    //Eval product at infinity equals highest power coefficient
+	TC_lemma_nodes.push_back(nm->mkNode(kind::EQUAL, EvalProducts[1], *(coefficients.end() - 1)));
+	    
+	    //For the rest of the lemmas:	
+	    unsigned index_counter = 2;
+	for(unsigned i = 0; i < points.size(); ++i){
+		temp_pt = points[i];
+		Node first_prod = coefficients[0];
+		Node coef_sum_acc = first_prod;
+		for(unsigned j = 1; j < coefficients.size(); ++j){
+			Node coef_sum = nm->mkNode(kind::BITVECTOR_MULT, temp_pt, coefficients[j];
+			coef_sum_acc = nm->mkNode(kind::BITVECTOR_PLUS, coef_sum_acc, coef_sum);
+			temp_pt = nm->mkNode(kind::BITVECTOR_MULT, temp_pt, temp_pt); 
+		}
+		TC_lemma_nodes.push_back(nm->mkNode(kind::EQUAL, EvalProducts[index_counter], coef_sum_acc));
+		++index_counter;
+	}
+						   
     //Rewrite the lemmas and introduce them.
      for(unsigned i = 0; i < (2*k) - 1; ++i){
 	     Trace("KevinsTrace") << "Rewriting lemma: " << TC_lemma_nodes[i] << "\n";
