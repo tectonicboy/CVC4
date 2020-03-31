@@ -1036,11 +1036,11 @@ void TheoryBV::presolve() {
 	    //For the rest of the lemmas:	
 	    unsigned index_counter = 2;
 	for(unsigned i = 0; i < points.size(); ++i){
-		temp_pt = points[i];
+		Node temp_pt = points[i];
 		Node first_prod = coefficients[0];
 		Node coef_sum_acc = first_prod;
 		for(unsigned j = 1; j < coefficients.size(); ++j){
-			Node coef_sum = nm->mkNode(kind::BITVECTOR_MULT, temp_pt, coefficients[j];
+			Node coef_sum = nm->mkNode(kind::BITVECTOR_MULT, temp_pt, coefficients[j]);
 			coef_sum_acc = nm->mkNode(kind::BITVECTOR_PLUS, coef_sum_acc, coef_sum);
 			temp_pt = nm->mkNode(kind::BITVECTOR_MULT, temp_pt, temp_pt); 
 		}
