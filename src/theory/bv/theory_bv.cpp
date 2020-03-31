@@ -1150,9 +1150,9 @@ void TheoryBV::presolve() {
 	      );
 		++multiple;
       }
-
-      Trace("bitvector::TCMultiplier") << "Full product expression " << fullProduct << "\n";
-      Trace("KevinsTrace") << "Full product (kevin's): " << full_product << "\n";
+	//The code to initialize this full product is commented out, so we can't use it in a print.
+     // Trace("bitvector::TCMultiplier") << "Full product expression " << fullProduct << "\n";
+	    Trace("KevinsTrace") << "Full product (kevin's): " << full_product << "\n";
 	
       Node coefficientsToResultLemma =
 	nm->mkNode(kind::EQUAL, utils::mkExtract(full_product, n-1, 0), result);
