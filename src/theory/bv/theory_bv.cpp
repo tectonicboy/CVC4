@@ -996,7 +996,7 @@ void TheoryBV::presolve() {
 
       vector<Node> coefficients;
       vector<Node> TC_lemma_nodes;
-      string coef_name = "TC_multiply_";
+      string coef_name = "TC_multiply_" + std::to_string(n) + "_";
      // string lemma_name = "TC_lemma_";
       for(unsigned i = 0; i < (2*k) - 1; ++i){
 	     string name = coef_name;
