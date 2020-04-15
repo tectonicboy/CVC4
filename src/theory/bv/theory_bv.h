@@ -113,6 +113,8 @@ public:
 
   void presolve() override;
 
+  std::set<Node> generateTCLemmas(TNode multiplier);
+
   bool applyAbstraction(const std::vector<Node>& assertions, std::vector<Node>& new_assertions);
 
   void setProofLog(proof::BitVectorProof* bvp);
@@ -189,7 +191,9 @@ public:
   bool d_calledPreregister;
 
   /** We track multipliers so they can be approximated */
-  context::CDHashSet<Node, NodeHashFunction> d_multipliers;
+  context::CDList<Node> d_multipliers;
+  std::unordered_map<Node, std::set<Node>, NodeHashFunction > d_TCLemmas;
+  context::CDHashSet<Node, NodeHashFunction> d_usedTCLemmas;
 
   //for extended functions
   bool d_needsLastCallCheck;

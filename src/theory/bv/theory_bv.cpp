@@ -77,6 +77,8 @@ TheoryBV::TheoryBV(context::Context* c,
       d_isCoreTheory(false),
       d_calledPreregister(false),
       d_multipliers(u),
+      d_TCLemmas(),
+      d_usedTCLemmas(u),
       d_needsLastCallCheck(false),
       d_extf_range_infer(u),
       d_extf_collapse_infer(u)
@@ -255,8 +257,9 @@ void TheoryBV::preRegisterTerm(TNode node) {
 
   if (node.getKind() == kind::BITVECTOR_MULT)
   {
-    Trace("bitvector::TCMultiplier") << "Registering " << node << "\n";
-    d_multipliers.insert(node);
+    Trace("bitvector::TCMultiplier") << "Registering and generating lemmas for " << node << "\n";
+    d_multipliers.push_back(node);
+    d_TCLemmas.insert(std::make_pair(node, generateTCLemmas(node)));
   }
 
   if (options::bitblastMode() == options::BitblastMode::EAGER)
@@ -830,28 +833,63 @@ Node TheoryBV::ppRewrite(TNode t)
   return res;
 }
 
+
 void TheoryBV::presolve() {
   Debug("bitvector") << "TheoryBV::presolve" << endl;
 
-  // Generate all static TC lemmas
+  // Lemmas are created during registration.
+  // This adds them to the solver.
   // For multipliers that are not handled by shift-add, these need to constrain the result
   // so that it is correct.
   Trace("bitvector::TCMultiplier") << "Generating static lemmas\n";
   Trace("testTrace") << "CHANGES ARE WORKING!!!\n";
 
-  for (auto i = d_multipliers.begin(); i != d_multipliers.end(); ++i) { // For each multiplier...
+  // The code for this is a little convoluted because we don't want to make
+  // any assumptions about the preservation of iteraters vs. modification
+  // of d_multipliers.  Calling lemma will call theory_bv::preRegister
+  // which will then modify d_multipliers, so...
+  bool lemmaHasBeenAdded = false;
+  do {
+    lemmaHasBeenAdded = false;
+    for (auto i = d_multipliers.begin(); i != d_multipliers.end(); ++i) { // For each multiplier...
+      Node currentMultiplier = *i;
+      Trace("KevinsTrace") << "Looking at lemmas for " << currentMultiplier << "\n";
+
+      // Static case : Add all of the lemmas to the solver
+      // Dynamic case would only add some of the lemmas to the solver
+      for (auto l = d_TCLemmas[currentMultiplier].begin(); l != d_TCLemmas[currentMultiplier].end(); ++l) {
+	Node currentLemma = *l;
+	
+	if (d_usedTCLemmas.find(currentLemma) == d_usedTCLemmas.end()) {
+	  lemma(currentLemma);
+	  Trace("KevinsTrace") << "Adding " << currentLemma << "\n";
+	  d_usedTCLemmas.insert(currentLemma);
+	  lemmaHasBeenAdded = true;
+	}
+      }
+
+      if (lemmaHasBeenAdded) {
+	// Jump back to outer loop so that the iterator l is refreshed
+	break;
+      }
+    }    
+  } while (lemmaHasBeenAdded);
+}
+
+std::set<Node> TheoryBV::generateTCLemmas(TNode multiplier) {
+  std::set<Node> lemmas;
 
     // Only generate constraints if it is too big to use shift-add
-    if (utils::getSize(*i) < MultiplierAbstractionSizeLimit()) {
-      Trace("bitvector::TCMultiplier") << "Too small " << *i << "\n";
+    if (utils::getSize(multiplier) < MultiplierAbstractionSizeLimit()) {
+      Trace("bitvector::TCMultiplier") << "Too small " << multiplier << "\n";
 
     } else {
       // Note that this line outputs the actual node / expression
-      Trace("bitvector::TCMultiplier") << "Generating lemmas for " << *i << "\n";
+      Trace("bitvector::TCMultiplier") << "Generating lemmas for " << multiplier << "\n";
       NodeManager *nm = NodeManager::currentNM(); // This is used to make nodes!
 
       //Initialize crucial Toom-Cook values.
-            unsigned n = utils::getSize(*i), k = 0, limb_size = 0, start_index = 0, end_index = 0;
+            unsigned n = utils::getSize(multiplier), k = 0, limb_size = 0, start_index = 0, end_index = 0;
 	    if(n < 16) {k = 3;}
 	    else if ((n > 15) && (n < 65)) {k = 4;}
 	   
@@ -875,9 +913,9 @@ void TheoryBV::presolve() {
       
 
       // This is where you will need to improve things
-      Assert(utils::getSize(*i) == n);
-      Assert((*i).getNumChildren() == 2);  // Multiplication of two numbers!
-      Node result = *i;        // The result we are trying to compute
+      Assert(utils::getSize(multiplier) == n);
+      Assert((multiplier).getNumChildren() == 2);  // Multiplication of two numbers!
+      Node result = multiplier;        // The result we are trying to compute
       Node left = result[0];   // Left hand side of the input
       Node right = result[1];  // Right hand side of the input
 		
@@ -1018,7 +1056,7 @@ void TheoryBV::presolve() {
 	      
 	     // Node eval0lemma = nm->mkNode(kind::EQUAL, eval0product, e);
      	     //Trace("bitvector::TCMultiplier") << "Adding lemma " << eval0lemma << "\n";
-             // lemma(eval0lemma);
+             // lemmas.insert(eval0lemma);
       }
 	    
 	    
@@ -1048,12 +1086,12 @@ void TheoryBV::presolve() {
 		++index_counter;
 	}
 						   
-    //Rewrite the lemmas and introduce them.
+    //Rewrite the lemmas and add them to the set.
      for(unsigned i = 0; i < (2*k) - 1; ++i){
 	     Trace("KevinsTrace") << "Rewriting lemma: " << TC_lemma_nodes[i] << "\n";
 	     TC_lemma_nodes[i] = Rewriter::rewrite(TC_lemma_nodes[i]);
 	     Trace("KevinsTrace") << "Adding re-written lemma: " << TC_lemma_nodes[i] << "\n";
-	     lemma(TC_lemma_nodes[i]);
+	     lemmas.insert(TC_lemma_nodes[i]);
      }
 
      /* Node a = nm->mkNode(kind::APPLY_UF,
@@ -1115,7 +1153,7 @@ void TheoryBV::presolve() {
       Node eval0lemma = nm->mkNode(kind::EQUAL, eval0product, e);
 
       Trace("bitvector::TCMultiplier") << "Adding lemma " << eval0lemma << "\n";
-      lemma(eval0lemma);
+      lemmas.insert(eval0lemma);
 
       */
 
@@ -1158,12 +1196,15 @@ void TheoryBV::presolve() {
 	nm->mkNode(kind::EQUAL, utils::mkExtract(full_product, n-1, 0), result);
       Trace("bitvector::TCMultiplier") << "Link full product and result " << coefficientsToResultLemma << "\n";
       Trace("KevinsTrace") << "Link the full product and the result: " << coefficientsToResultLemma << "\n";
+      lemmas.insert(Rewriter::rewrite(coefficientsToResultLemma));
+
 		    Trace("KevinsTrace") << "Passing line: " << __LINE__ <<"\n";
       points = {}; coefficients = {};
       TC_lemma_nodes = {};  EvalProducts = {};
       limbs_A = {}; limbs_B = {};
     }
-  }
+
+    return lemmas;
 }
 
 static int prop_count = 0;
