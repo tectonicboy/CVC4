@@ -52,8 +52,8 @@ class EagerBitblastSolver;
 
 class AbstractionModule;
 
-// At what size do we approximate and at what size do we just use shift-add?
-unsigned MultiplierAbstractionSizeLimit (void);
+// Which kinds of multiplier should we abstract and use Toom-Cook?
+bool shouldTCMultiplier(TNode);
 
 class TheoryBV : public Theory {
 

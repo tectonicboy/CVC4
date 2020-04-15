@@ -45,9 +45,9 @@ namespace CVC4 {
 namespace theory {
 namespace bv {
 
-unsigned MultiplierAbstractionSizeLimit (void) {
+bool shouldTCMultiplier(TNode node) {
   // For now, just set this to 8 but you can try with anything you like
-  return 8;
+  return (utils::getSize(node) > 8);
 }
 
 TheoryBV::TheoryBV(context::Context* c,
@@ -236,7 +236,8 @@ Node TheoryBV::expandDefinition(LogicRequest &logicRequest, Node node) {
     break;
 
   case kind::BITVECTOR_MULT:
-    if (utils::getSize(node) > MultiplierAbstractionSizeLimit()) {
+    if (shouldTCMultiplier(node)) {
+      // If we are going to use the TC multiplier we need uninterpreted functions
       logicRequest.widenLogic(THEORY_UF);
     }
     return node;
@@ -880,7 +881,7 @@ std::set<Node> TheoryBV::generateTCLemmas(TNode multiplier) {
   std::set<Node> lemmas;
 
     // Only generate constraints if it is too big to use shift-add
-    if (utils::getSize(multiplier) < MultiplierAbstractionSizeLimit()) {
+  if (!shouldTCMultiplier(multiplier)) {
       Trace("bitvector::TCMultiplier") << "Too small " << multiplier << "\n";
 
     } else {
