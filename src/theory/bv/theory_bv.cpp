@@ -46,8 +46,17 @@ namespace theory {
 namespace bv {
 
 bool shouldTCMultiplier(TNode node) {
-  // For now, just set this to 8 but you can try with anything you like
-  return (utils::getSize(node) > 8);
+  if (node.getKind() == kind::BITVECTOR_MULT) {
+    // For now, just set this to 8 but you can try with anything you like
+    const unsigned limit = 8;
+
+    if (utils::isExpandingMultiply(node)) {
+      return (utils::getSize(node) > 2*limit);
+    } else {
+      return (utils::getSize(node) > 8);
+    }
+  }
+  return false;
 }
 
 TheoryBV::TheoryBV(context::Context* c,
