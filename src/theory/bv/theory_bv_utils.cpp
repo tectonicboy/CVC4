@@ -481,6 +481,42 @@ Node eliminateBv2Nat(TNode node)
   return children.size() == 1 ? children[0] : nm->mkNode(kind::PLUS, children);
 }
 
+/* ------------------------------------------------------------------------- */
+
+bool isExpandingMultiply(TNode node) {
+  if (node.getKind() == kind::BITVECTOR_MULT) {
+    unsigned outputSize = getSize(node);
+    unsigned childCount = node.getNumChildren();
+
+    for (unsigned i = 0; i < childCount; ++i) {
+      if (node[i].getKind() == kind::BITVECTOR_ZERO_EXTEND ||
+	  node[i].getKind() == kind::BITVECTOR_SIGN_EXTEND) {
+	if (getSize(node[i][0]) * childCount <= outputSize) {
+	  // Multiplication could be expanding
+	  continue;
+	}
+      } else if (node[i].getKind() == kind::BITVECTOR_CONCAT) {
+	if (node[i].getNumChildren() == 2) {
+	  if (isZero(node[i][0]) || isOne(node[i][0])) {
+	    if (getSize(node[i][1]) * childCount <= outputSize) {
+	      // Another way of zero / sign extending
+	      continue;
+	    }
+	  }
+	}
+      }
+
+      // Definitely not expanding
+      return false;
+    }
+
+    // All children are extended by enough
+    return true;
+  }
+  return false; // Not a multiply at all
+}
+
+
 }/* CVC4::theory::bv::utils namespace */
 }/* CVC4::theory::bv namespace */
 }/* CVC4::theory namespace */

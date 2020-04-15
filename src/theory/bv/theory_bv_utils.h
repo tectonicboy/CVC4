@@ -215,6 +215,18 @@ void intersect(const std::vector<uint32_t>& v1,
  * where n is the bitwidth of x.
  */
 Node eliminateBv2Nat(TNode node);
+
+/**
+ * An expanding multiply is one where two n-bit (or less) inputs give a 2n bit output.
+ * i.e. where the high-word of the output is used as well as opposed to just the low-word
+ * in the conventional (modulo) multiplication.
+ * i.e. it is a lossless multiplication.
+ * In SMT-LIB this is expressed by sign or zero extending both inputs to at least
+ * double their width.
+ */
+
+bool isExpandingMultiply(TNode node);
+
 }
 }
 }
