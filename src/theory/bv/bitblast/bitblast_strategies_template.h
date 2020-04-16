@@ -400,8 +400,7 @@ void OverApproximateMultBB (TNode node, std::vector<T>& res, TBitblaster<T>* bb)
   Assert(res.size() == 0 && node.getKind() == kind::BITVECTOR_MULT);
 
   // Use the basic shift-add multiplier for all small multiplications
-  // i.e. bit-vectors who's width is under MultiplierAbstractionSizeLimit()
-  if (utils::getSize(node) > MultiplierAbstractionSizeLimit()) {
+  if (shouldTCMultiplier(node)) {
     Trace("bitvector::TCMultiplier") << "Bit blast : approximating " << node << "\n";
     DefaultVarBB<T>(node, res, bb);
   } else {

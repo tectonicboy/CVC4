@@ -52,8 +52,8 @@ class EagerBitblastSolver;
 
 class AbstractionModule;
 
-// At what size do we approximate and at what size do we just use shift-add?
-unsigned MultiplierAbstractionSizeLimit (void);
+// Which kinds of multiplier should we abstract and use Toom-Cook?
+bool shouldTCMultiplier(TNode);
 
 class TheoryBV : public Theory {
 
@@ -112,6 +112,8 @@ public:
   void ppStaticLearn(TNode in, NodeBuilder<>& learned) override;
 
   void presolve() override;
+
+  std::set<Node> generateTCLemmas(TNode multiplier);
 
   bool applyAbstraction(const std::vector<Node>& assertions, std::vector<Node>& new_assertions);
 
@@ -189,7 +191,9 @@ public:
   bool d_calledPreregister;
 
   /** We track multipliers so they can be approximated */
-  context::CDHashSet<Node, NodeHashFunction> d_multipliers;
+  context::CDList<Node> d_multipliers;
+  std::unordered_map<Node, std::set<Node>, NodeHashFunction > d_TCLemmas;
+  context::CDHashSet<Node, NodeHashFunction> d_usedTCLemmas;
 
   //for extended functions
   bool d_needsLastCallCheck;
