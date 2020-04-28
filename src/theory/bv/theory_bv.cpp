@@ -900,6 +900,14 @@ std::set<Node> TheoryBV::generateTCLemmas(TNode multiplier) {
 
       //Initialize crucial Toom-Cook values.
             unsigned n = utils::getSize(multiplier), k = 0, limb_size = 0, start_index = 0, end_index = 0;
+	    bool expanding = false;
+	  
+
+	    if (utils::isExpandingMultiply(multiplier)){
+		    expanding = true;
+		    n /= 2;
+	    }
+	    //Pick a value for k.
 	    if(n < 16) {k = 3;}
 	    else if ((n > 15) && (n < 65)) {k = 4;}
 	   
@@ -926,8 +934,14 @@ std::set<Node> TheoryBV::generateTCLemmas(TNode multiplier) {
       Assert(utils::getSize(multiplier) == n);
       Assert((multiplier).getNumChildren() == 2);  // Multiplication of two numbers!
       Node result = multiplier;        // The result we are trying to compute
-      Node left = result[0];   // Left hand side of the input
-      Node right = result[1];  // Right hand side of the input
+	  if(expanding){
+      		Node left = utils::mkExtract(result[0], 0, n);   // Left hand side of the input
+      		Node right = utils::mkExtract(result[1], 0, n);  // Right hand side of the input
+	  }
+	  else{
+		  Node left = result[0];
+		  Node right = result[1];
+	  }
 		
 	    
 	    
