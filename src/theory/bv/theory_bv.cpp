@@ -899,6 +899,7 @@ std::set<Node> TheoryBV::generateTCLemmas(TNode multiplier) {
       NodeManager *nm = NodeManager::currentNM(); // This is used to make nodes!
 
       //Initialize crucial Toom-Cook values.
+      // n is the size of the inputs to the multiplier
             unsigned n = utils::getSize(multiplier), k = 0, limb_size = 0, start_index = 0, end_index = 0;
 	    bool expanding = false;
 	  
@@ -907,6 +908,7 @@ std::set<Node> TheoryBV::generateTCLemmas(TNode multiplier) {
 		    expanding = true;
 		    n /= 2;
 	    }
+	    Trace("bitvector::TCMultiplier") << "Is " << multiplier << " an expanding multiplier?" << expanding << "\n";
 	    //Pick a value for k.
 	    if(n < 16) {k = 3;}
 	    else if ((n > 15) && (n < 65)) {k = 4;}
@@ -931,16 +933,17 @@ std::set<Node> TheoryBV::generateTCLemmas(TNode multiplier) {
       
 
       // This is where you will need to improve things
-      Assert(utils::getSize(multiplier) == n);
       Assert((multiplier).getNumChildren() == 2);  // Multiplication of two numbers!
       Node result = multiplier;        // The result we are trying to compute
+      Node left;
+      Node right;
 	  if(expanding){
-      		Node left = utils::mkExtract(result[0], 0, n);   // Left hand side of the input
-      		Node right = utils::mkExtract(result[1], 0, n);  // Right hand side of the input
+      		left = utils::mkExtract(result[0], 0, n);   // Left hand side of the input
+      		right = utils::mkExtract(result[1], 0, n);  // Right hand side of the input
 	  }
 	  else{
-		  Node left = result[0];
-		  Node right = result[1];
+		left = result[0];
+		right = result[1];
 	  }
 		
 	    
@@ -970,12 +973,7 @@ std::set<Node> TheoryBV::generateTCLemmas(TNode multiplier) {
 					  (eval_prod_size - last_limb_size), 
 					  (utils::mkExtract(right, (n-1), start_index))));
 	
-	//Wouldn't work for k = 2, and would give wrong results when k > 3. FIX IT!
-	Trace("KevinsTrace") << "Left LSBs: " << limbs_A[0] << "\n";
-	Trace("KevinsTrace") << "Left Mid: " << limbs_A[1] << "\n";
-	Trace("KevinsTrace") << "Left MSBs: " << limbs_A[2] << "\n";
-       
-	    
+
 	    //Inputting points. Zero and infinity are always chosen by default.
 	    short point_pos = 1, point_neg = -1;
 	    vector<Node> points;
@@ -1216,8 +1214,14 @@ std::set<Node> TheoryBV::generateTCLemmas(TNode multiplier) {
      // Trace("bitvector::TCMultiplier") << "Full product expression " << fullProduct << "\n";
 	    Trace("KevinsTrace") << "Full product (kevin's): " << full_product << "\n";
 	
-      Node coefficientsToResultLemma =
-	nm->mkNode(kind::EQUAL, utils::mkExtract(full_product, n-1, 0), result);
+      Node coefficientsToResultLemma;
+
+      if (expanding) {
+	coefficientsToResultLemma = full_product;
+      } else {
+	coefficientsToResultLemma =
+	  nm->mkNode(kind::EQUAL, utils::mkExtract(full_product, n-1, 0), result);
+      }
       Trace("bitvector::TCMultiplier") << "Link full product and result " << coefficientsToResultLemma << "\n";
       Trace("KevinsTrace") << "Link the full product and the result: " << coefficientsToResultLemma << "\n";
       lemmas.insert(Rewriter::rewrite(coefficientsToResultLemma));
