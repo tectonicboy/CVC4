@@ -47,6 +47,13 @@ namespace bv {
 
 bool shouldTCMultiplier(TNode node) {
   if (node.getKind() == kind::BITVECTOR_MULT) {
+    // Multiplication by a constant is already a special case so
+    // no need to use the Toom-Cook multiplier
+    for (const TNode& n : node)
+    {
+      if (utils::isBvConstTerm(n)) { return false; }
+    }
+
     // For now, just set this to 8 but you can try with anything you like
     const unsigned limit = 8;
 
