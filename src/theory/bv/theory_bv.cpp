@@ -47,6 +47,13 @@ namespace bv {
 
 bool shouldTCMultiplier(TNode node) {
   if (node.getKind() == kind::BITVECTOR_MULT) {
+    // Multiplication by a constant is already a special case so
+    // no need to use the Toom-Cook multiplier
+    for (const TNode& n : node)
+    {
+      if (utils::isBvConstTerm(n)) { return false; }
+    }
+
     // For now, just set this to 8 but you can try with anything you like
     const unsigned limit = 8;
 
@@ -1017,7 +1024,7 @@ std::set<Node> TheoryBV::generateTCLemmas(TNode multiplier) {
 		  	  Node acc_A = temp_res_A;
 		 	  Node acc_B = temp_res_B;
 		 	   for(unsigned j = 1; j <= (k-1); ++j){
-			   		 temp_pt = nm->mkNode(kind::BITVECTOR_MULT, temp_pt, temp_pt);  
+			     temp_pt = Rewriter::rewrite(nm->mkNode(kind::BITVECTOR_MULT, temp_pt, temp_pt));
 			   		 temp_res_A = nm->mkNode(kind::BITVECTOR_MULT, temp_pt, limbs_A[j]);
 			   		 temp_res_B = nm->mkNode(kind::BITVECTOR_MULT, temp_pt, limbs_B[j]);	
 			   		 acc_A = nm->mkNode(kind::BITVECTOR_PLUS, acc_A, temp_res_A);   
@@ -1102,7 +1109,7 @@ std::set<Node> TheoryBV::generateTCLemmas(TNode multiplier) {
 		for(unsigned j = 1; j < coefficients.size(); ++j){
 			Node coef_sum = nm->mkNode(kind::BITVECTOR_MULT, temp_pt, coefficients[j]);
 			coef_sum_acc = nm->mkNode(kind::BITVECTOR_PLUS, coef_sum_acc, coef_sum);
-			temp_pt = nm->mkNode(kind::BITVECTOR_MULT, temp_pt, temp_pt); 
+			temp_pt = Rewriter::rewrite(nm->mkNode(kind::BITVECTOR_MULT, temp_pt, temp_pt));
 		}
 		TC_lemma_nodes.push_back(nm->mkNode(kind::EQUAL, EvalProducts[index_counter], coef_sum_acc));
 		++index_counter;
