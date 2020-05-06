@@ -20,6 +20,7 @@
 
 #include "options/theory_options.h"
 #include "theory/theory.h"
+#include "theory/rewriter.h"
 
 namespace CVC4 {
 namespace theory {
@@ -530,6 +531,7 @@ void registerExpandingMultiply(Node node) {
   Assert(node.getKind() == kind::BITVECTOR_MULT);
 
   registeredExpandingMultipliers.insert(node);
+  registeredExpandingMultipliers.insert(Rewriter::rewrite(node));
 
   return;
 }
