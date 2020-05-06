@@ -1005,14 +1005,19 @@ std::set<Node> TheoryBV::generateTCLemmas(TNode multiplier) {
 
 	    Node eval_zero_B = *(limbs_B.begin());
 
-	    EvalProducts.push_back(nm->mkNode(kind::BITVECTOR_MULT, eval_zero_A, eval_zero_B));
+	    Node eval_zero_AB = nm->mkNode(kind::BITVECTOR_MULT, eval_zero_A, eval_zero_B);
+	    EvalProducts.push_back(eval_zero_AB);
+	    utils::registerExpandingMultiply(eval_zero_AB);
 
 	    
 	    //Eval at infinity.
 	    Node eval_inf_A = *(limbs_A.end() - 1);
 
 	    Node eval_inf_B = *(limbs_B.end() - 1);
-	    EvalProducts.push_back(nm->mkNode(kind::BITVECTOR_MULT, eval_inf_A, eval_inf_B));
+
+	    Node eval_inf_AB = nm->mkNode(kind::BITVECTOR_MULT, eval_inf_A, eval_inf_B);
+	    EvalProducts.push_back(eval_inf_AB);
+
 	    //Eval at all other points.
 	   	 Node A_low = limbs_A[0];  
            	 Node B_low = limbs_B[0];
@@ -1030,7 +1035,9 @@ std::set<Node> TheoryBV::generateTCLemmas(TNode multiplier) {
 			   		 acc_A = nm->mkNode(kind::BITVECTOR_PLUS, acc_A, temp_res_A);   
 			   		 acc_B = nm->mkNode(kind::BITVECTOR_PLUS, acc_B, temp_res_B);    
 		  	  }
-		  	  EvalProducts.push_back(nm->mkNode(kind::BITVECTOR_MULT, acc_A, acc_B)); 
+			   Node eval_point_AB = nm->mkNode(kind::BITVECTOR_MULT, acc_A, acc_B); 
+			   EvalProducts.push_back(eval_point_AB);
+			   utils::registerExpandingMultiply(eval_point_AB);
 	   	 }
 
 	   
