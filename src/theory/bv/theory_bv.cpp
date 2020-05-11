@@ -1010,7 +1010,9 @@ std::set<Node> TheoryBV::generateTCLemmas(TNode multiplier) {
 	    else{
 		    new_N = (limb_size + (3 * (f( ((double)k) - 1))) + ( ((double)k) - 2));
 	    }
-	    eval_prod_size = (2 * new_N) + 1;
+	  
+	    eval_prod_size = (2 * new_N) + 1; //Multiplication of two binary numbers of the same bitlength, 
+	  				      //and +1 for the sign bit.
 	  
 	  
             Trace("KevinsTrace") << "limb size = " << limb_size << "\n";
