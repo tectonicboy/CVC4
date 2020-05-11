@@ -893,6 +893,11 @@ void TheoryBV::presolve() {
   } while (lemmaHasBeenAdded);
 }
 
+double f(double x){
+	if (floor(log2(x)) == log2(x)) { return log2(x) + 1; }
+	else { return ceil(log2(x)); }
+}
+		
 std::set<Node> TheoryBV::generateTCLemmas(TNode multiplier) {
   std::set<Node> lemmas;
 
@@ -918,24 +923,98 @@ std::set<Node> TheoryBV::generateTCLemmas(TNode multiplier) {
 		    n = (n & 0x1) ? (n / 2) + 1 : (n / 2);
 	    }
 	    Trace("bitvector::TCMultiplier") << "Is " << multiplier << " an expanding multiplier? " << (expanding ? "Yes" : "No") << "\n";
-	    //Pick a value for k.
-	    if(n < 16) {k = 3;}
-	    else if ((n > 15) && (n < 65)) {k = 4;}
-	   
-	    else {
-		    Trace("KevinsTrace") << "Error: N is too big. Make sure it's at most 64.\n"; 
-		    Assert(n < 65);
+	    //***** SELECTION OF k BASED ON RESULTS OF NEW FORMULA-GENERATING ALGORITHM *****
+	    if( ( (9 <= n) && (n <= 26) ) || (n == 28) )
+	    { 
+		k = 2;
 	    }
+	    else if ( (n == 27 ) || ( (29 <= n) && (n <= 39) ) || (n == 41) || (n == 42) || (n == 45) )
+	    {
+	    	k = 3;
+	    }
+	    else if ( (n == 40) || (n == 43) || (n == 44) || ( (46 <= n) && (n <= 60) ) )
+	    {
+	     	k = 4;    
+	    }
+	    else if ( (n == 65) || (n == 66) )
+	    {
+		k = 6;
+	    }
+	    else if ( ( (61 <= n) && (n <= 63) ) || ( (67 <= n) && (n <= 70) ) || ( (73 <= n) && (n <= 77) )
+		     || ( (81 <= n) && (n <= 84) ) || ( (89 <= n) && (n <= 91) ) || ( (97 <= n) && (n <= 98) )
+		     || (n == 105) )
+	    {
+		k = 7;
+	    }
+	    else if ( (n == 64) || (n == 71) || (n == 72) || ( (78 <= n) && (n <= 80) ) || ( (85 <= n) && (n <= 88) )
+		     || ( (92 <= n) && (n <= 96) ) || ( (99 <= n) && (n <= 104) ) || ( (106 <= n) && (n <= 168) )
+		     || ( (170 <= n) && (n <= 176) ) || ( (183 <= n) && (n <= 184) ) )
+	    {
+		k = 8;    
+	    }
+	    else if ( ( (185 <= n) && (n <= 187) ) || ( (197 <= n) && (n <= 198) ) )
+	    {
+		k = 11;    
+	    }
+	    else if ( ( (188 <= n) && (n <= 192) ) || ( (199 <= n) && (n <= 204) ) || ( (211 <= n) && (n <= 216) )
+		     || ( (226 <= n) && (n <= 228) ) ) 
+	    {
+		k = 12;    
+	    }
+	    else if ( (n == 169) || ( (181 <= n) && (n <= 182) ) || ( (193 <= n) && (n <= 195) ) || ( (205 <= n) && (n <= 208) )
+		     || ( (217 <= n) && (n <= 221) ) || ( (229 <= n) && (n <= 234) ) || ( (241 <= n) && (n <= 247) )
+		     || ( (256 <= n) && (n <= 260) ) || ( (271 <= n) && (n <= 273) ) )
+	    {
+		k = 13;    
+	    }
+	    else if ( (n == 196) || ( (209 <= n) && (n <= 210) ) || ( (222 <= n) && (n <= 224) ) || ( (235 <= n) && (n <= 238) )
+		     || ( (248 <= n) && (n <= 252) ) || ( (261 <= n) && (n <= 266) ) || ( (274 <= n) && (n <= 280) )
+		     || ( (287 <= n) && (n <= 294) ) || ( (301 <= n) && (n <= 308) ) || ( (316 <= n) && (n <= 322) )
+		     || ( (331 <= n) && (n <= 336) ) || ( (346 <= n) && (n <= 350) ) || ( (361 <= n) && (n <= 364) )
+		     || ( (376 <= n) && (n <= 378) ) || ( (391 <= n) && (n <= 392) ) || (n == 406) )
+	    {
+		k = 14;    
+	    }
+	  else if ( (n == 225) || ( (239 <= n) && (n <= 240) ) || ( (253 <= n) && (n <= 255) ) || ( (267 <= n) && (n <= 270) )
+		   || ( (281 <= n) && (n <= 285) ) || ( (295 <= n) && (n <= 300) ) || ( (309 <= n) && (n <= 315) ) 
+		   || ( (323 <= n) && (n <= 330) ) || ( (337 <= n) && (n <= 345) ) || ( (351 <= n) && (n <= 360) )
+		   || ( (365 <= n) && (n <= 375) ) || ( (379 <= n) && (n <= 390) ) || ( (393 <= n) && (n <= 405) )
+		   || ( (407 <= n) && (n <= 4080) ) )//No that's not a typo, it is 4080 for some reason.
+	  {
+		k = 15;
+	  }
+		       
+		   
 	    Trace("KevinsTrace") << "k was chosen to be: " << k << "\n";
 	    double LS = double(n) / double(k);
 	    Trace("KevinsTrace") << "LS = n / k = " << LS <<"\n";
 	    limb_size = ceil(LS);
 	    Trace("KevinsTrace") << "limb_size = ceil(LS) = " << limb_size <<"\n";
 	    end_index = limb_size - 1;
-      	    unsigned eval_prod_size; // This will need to be set correctly and may not be the same for each
-	    if(k == 2) { eval_prod_size = (2 *( (ceil(double(n)/double(k))) + 2)) + 1; }
-	    else { eval_prod_size = (2 *( (ceil(double(n)/double(k))) + 5)) + 1; }
+	  
+	  
+	    //**** CALCULATE MAX NUMBER OF BITS POSSIBLY REQUIRED FOR EVALUATION WITH THIS k ****
+	    //**** (just like the algorithm I came up with does it)
+      	    unsigned eval_prod_size, new_N;
+	    if (k == 2) {
+		    new_N = limb_size + 1;
+	    }
+	    else if (k == 3){
+		    if( ( ( ((double)k) * limb_size) - ((double)n) ) == 2){
+			   new_N = limb_size + 4; 
+		    }
+		    else{
+			  new_N = limb_size + 5;  
+		    }
+	    }
+	    else{
+		    new_N = (limb_size + (3 * (f( ((double)k) - 1))) + ( ((double)k) - 2));
+	    }
+	    eval_prod_size = (2 * new_N) + 1;
+	  
+	  
             Trace("KevinsTrace") << "limb size = " << limb_size << "\n";
+	    Trace("KevinsTrace") << "Bitlength of the multiply to be produced: " << new_N << "\n";
             Trace("KevinsTrace") << "max eval product size = " << eval_prod_size << "\n";
 	    
 	    
