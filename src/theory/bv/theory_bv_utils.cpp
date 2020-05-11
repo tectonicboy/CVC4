@@ -20,6 +20,7 @@
 
 #include "options/theory_options.h"
 #include "theory/theory.h"
+#include "theory/rewriter.h"
 
 namespace CVC4 {
 namespace theory {
@@ -483,8 +484,18 @@ Node eliminateBv2Nat(TNode node)
 
 /* ------------------------------------------------------------------------- */
 
+// This shouldn't be a global but it fixes the immediate problem
+static std::unordered_set<Node, NodeHashFunction> registeredExpandingMultipliers;
+
 bool isExpandingMultiply(TNode node) {
   if (node.getKind() == kind::BITVECTOR_MULT) {
+
+    auto it = registeredExpandingMultipliers.find(node);
+
+    if (it != registeredExpandingMultipliers.end()) {
+      return true;
+    }
+
     unsigned outputSize = getSize(node);
     unsigned childCount = node.getNumChildren();
 
@@ -515,6 +526,16 @@ bool isExpandingMultiply(TNode node) {
   }
   return false; // Not a multiply at all
 }
+
+void registerExpandingMultiply(Node node) {
+  Assert(node.getKind() == kind::BITVECTOR_MULT);
+
+  registeredExpandingMultipliers.insert(node);
+  registeredExpandingMultipliers.insert(Rewriter::rewrite(node));
+
+  return;
+}
+
 
 
 }/* CVC4::theory::bv::utils namespace */

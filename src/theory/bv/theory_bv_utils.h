@@ -227,6 +227,12 @@ Node eliminateBv2Nat(TNode node);
 
 bool isExpandingMultiply(TNode node);
 
+
+/**
+ * Allows a multiply to be marked as expanding
+ */
+void registerExpandingMultiply(Node node);
+
 }
 }
 }

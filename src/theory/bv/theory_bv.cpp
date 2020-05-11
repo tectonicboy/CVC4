@@ -913,9 +913,11 @@ std::set<Node> TheoryBV::generateTCLemmas(TNode multiplier) {
 
 	    if (utils::isExpandingMultiply(multiplier)){
 		    expanding = true;
-		    n /= 2;
+		    // Registering things as expanding can mean we have expanding multiplies
+		    // that have an odd width
+		    n = (n & 0x1) ? (n / 2) + 1 : (n / 2);
 	    }
-	    Trace("bitvector::TCMultiplier") << "Is " << multiplier << " an expanding multiplier?" << expanding << "\n";
+	    Trace("bitvector::TCMultiplier") << "Is " << multiplier << " an expanding multiplier? " << (expanding ? "Yes" : "No") << "\n";
 	    //Pick a value for k.
 	    if(n < 16) {k = 3;}
 	    else if ((n > 15) && (n < 65)) {k = 4;}
@@ -942,15 +944,11 @@ std::set<Node> TheoryBV::generateTCLemmas(TNode multiplier) {
       // This is where you will need to improve things
       Assert((multiplier).getNumChildren() == 2);  // Multiplication of two numbers!
       Node result = multiplier;        // The result we are trying to compute
-      Node left;
-      Node right;
+      Node left = result[0];
+      Node right = result[1];
 	  if(expanding){
-      		left = utils::mkExtract(result[0], 0, n);   // Left hand side of the input
-      		right = utils::mkExtract(result[1], 0, n);  // Right hand side of the input
-	  }
-	  else{
-		left = result[0];
-		right = result[1];
+	    left = utils::mkExtract(left, n-1, 0);   // Left hand side of the input
+	    right = utils::mkExtract(right, n-1, 0);  // Right hand side of the input
 	  }
 		
 	    
@@ -1005,14 +1003,19 @@ std::set<Node> TheoryBV::generateTCLemmas(TNode multiplier) {
 
 	    Node eval_zero_B = *(limbs_B.begin());
 
-	    EvalProducts.push_back(nm->mkNode(kind::BITVECTOR_MULT, eval_zero_A, eval_zero_B));
+	    Node eval_zero_AB = nm->mkNode(kind::BITVECTOR_MULT, eval_zero_A, eval_zero_B);
+	    EvalProducts.push_back(eval_zero_AB);
+	    utils::registerExpandingMultiply(eval_zero_AB);
 
 	    
 	    //Eval at infinity.
 	    Node eval_inf_A = *(limbs_A.end() - 1);
 
 	    Node eval_inf_B = *(limbs_B.end() - 1);
-	    EvalProducts.push_back(nm->mkNode(kind::BITVECTOR_MULT, eval_inf_A, eval_inf_B));
+
+	    Node eval_inf_AB = nm->mkNode(kind::BITVECTOR_MULT, eval_inf_A, eval_inf_B);
+	    EvalProducts.push_back(eval_inf_AB);
+
 	    //Eval at all other points.
 	   	 Node A_low = limbs_A[0];  
            	 Node B_low = limbs_B[0];
@@ -1030,7 +1033,9 @@ std::set<Node> TheoryBV::generateTCLemmas(TNode multiplier) {
 			   		 acc_A = nm->mkNode(kind::BITVECTOR_PLUS, acc_A, temp_res_A);   
 			   		 acc_B = nm->mkNode(kind::BITVECTOR_PLUS, acc_B, temp_res_B);    
 		  	  }
-		  	  EvalProducts.push_back(nm->mkNode(kind::BITVECTOR_MULT, acc_A, acc_B)); 
+			   Node eval_point_AB = nm->mkNode(kind::BITVECTOR_MULT, acc_A, acc_B); 
+			   EvalProducts.push_back(eval_point_AB);
+			   utils::registerExpandingMultiply(eval_point_AB);
 	   	 }
 
 	   
@@ -1063,7 +1068,7 @@ std::set<Node> TheoryBV::generateTCLemmas(TNode multiplier) {
 
       vector<Node> coefficients;
       vector<Node> TC_lemma_nodes;
-      string coef_name = "TC_multiply_" + std::to_string(n) + "_";
+      string coef_name = "TC_multiply_" + (expanding ? string("exp_") : string("mod_"))  + std::to_string(n) + "_";
      // string lemma_name = "TC_lemma_";
       for(unsigned i = 0; i < (2*k) - 1; ++i){
 	     string name = coef_name;
@@ -1224,7 +1229,15 @@ std::set<Node> TheoryBV::generateTCLemmas(TNode multiplier) {
       Node coefficientsToResultLemma;
 
       if (expanding) {
-	coefficientsToResultLemma = full_product;
+	if (utils::getSize(full_product) == utils::getSize(result)) {
+	  coefficientsToResultLemma =
+	    nm->mkNode(kind::EQUAL, full_product, result);
+	} else {
+	  Assert(utils::getSize(full_product) == utils::getSize(result) + 1);
+	  Assert(utils::getSize(result) & 0x1); // We rounded up the divide by 2
+	  coefficientsToResultLemma =
+	    nm->mkNode(kind::EQUAL, utils::mkExtract(full_product, (utils::getSize(result)-1), 0), result);
+	}
       } else {
 	coefficientsToResultLemma =
 	  nm->mkNode(kind::EQUAL, utils::mkExtract(full_product, n-1, 0), result);
