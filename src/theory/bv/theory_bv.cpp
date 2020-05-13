@@ -135,7 +135,9 @@ TheoryBV::TheoryBV(context::Context* c,
   d_subtheoryMap[SUB_BITBLAST] = bb_solver;
 }
 
-TheoryBV::~TheoryBV() {}
+TheoryBV::~TheoryBV() {
+  utils::cleanExpandingMultiply();
+}
 
 void TheoryBV::setMasterEqualityEngine(eq::EqualityEngine* eq) {
   if (options::bitblastMode() == options::BitblastMode::EAGER)

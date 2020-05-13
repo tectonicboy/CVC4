@@ -536,6 +536,9 @@ void registerExpandingMultiply(Node node) {
   return;
 }
 
+void cleanExpandingMultiply(void) {
+  registeredExpandingMultipliers.clear();
+}
 
 
 }/* CVC4::theory::bv::utils namespace */
