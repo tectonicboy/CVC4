@@ -233,6 +233,8 @@ bool isExpandingMultiply(TNode node);
  */
 void registerExpandingMultiply(Node node);
 
+void cleanExpandingMultiply(void);
+
 }
 }
 }
